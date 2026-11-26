@@ -1,0 +1,2606 @@
+<!DOCTYPE html>
+<html lang="id">
+<link rel="manifest" href="manifest.json" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>HarCript v2.4 — Pure Momentum Naik/Turun &amp; MASTER CALL MUAK ULTIMATE</title>
+<style>
+  :root {
+    --bg: #f1f5f9;
+    --surface: #ffffff;
+    --surface-alt: #f8fafc;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --primary: #1e3a8a;
+    --primary-bright: #2563eb;
+    --primary-soft: #eff6ff;
+    --primary-border: #bfdbfe;
+    --green: #059669;
+    --green-bright: #16a34a;
+    --green-bg: #ecfdf5;
+    --green-border: #6ee7b7;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --red-border: #fca5a5;
+    --amber: #d97706;
+    --amber-bg: #fffbeb;
+    --amber-border: #fcd34d;
+    --purple: #7c3aed;
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+    --radius: 14px;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.45;
+    overflow-x: hidden;
+    padding-bottom: 40px;
+  }
+
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  /* TOP NAVBAR */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  .topbar-inner {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 10px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-box {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: #ffffff;
+    font-weight: 900;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25);
+    flex-shrink: 0;
+  }
+
+  .brand-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--text);
+  }
+
+  .ver-badge {
+    background: var(--primary-soft);
+    color: var(--primary);
+    border: 1px solid var(--primary-border);
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+
+  .brand-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .mode-tabs {
+    display: inline-flex;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    padding: 4px;
+    border-radius: 12px;
+    gap: 4px;
+  }
+
+  .mode-tab {
+    border: none;
+    background: transparent;
+    padding: 8px 14px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .mode-tab.active {
+    background: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(30, 58, 138, 0.25);
+  }
+
+  .header-status-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .live-ticker-pill {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    padding: 5px 10px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ticker-top {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+  }
+
+  .ticker-sym {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-muted);
+  }
+
+  .ticker-val {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--text);
+  }
+
+  .ticker-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .node-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+    color: var(--green);
+  }
+
+  .node-pill.warn {
+    background: var(--amber-bg);
+    border-color: var(--amber-border);
+    color: #b45309;
+  }
+
+  .node-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* BUTTONS & INPUTS */
+  .btn {
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: transform 0.1s ease;
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn-gaskan {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    border-color: #1e3a8a;
+    color: #ffffff;
+    font-weight: 800;
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.28);
+  }
+
+  .btn-amber {
+    background: var(--amber-bg);
+    border-color: var(--amber-border);
+    color: #92400e;
+  }
+
+  .btn-sync {
+    background: var(--primary-soft);
+    border-color: var(--primary-border);
+    color: var(--primary);
+  }
+
+  .btn-dark {
+    background: #0f172a;
+    border-color: #0f172a;
+    color: #ffffff;
+  }
+
+  .gaskan-chip {
+    background: #facc15;
+    color: #0f172a;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+
+  .spinning .sync-spin {
+    display: inline-block;
+    animation: spin360 0.7s linear infinite;
+  }
+
+  @keyframes spin360 {
+    100% { transform: rotate(360deg); }
+  }
+
+  /* MAIN LAYOUT */
+  .main-wrap {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 12px 14px;
+  }
+
+  .panel-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .flex-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .chip-btn {
+    border: 1px solid var(--border-strong);
+    background: var(--surface-alt);
+    color: var(--text);
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .chip-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+  }
+
+  .lev-pill {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 6px;
+    background: var(--amber-bg);
+    color: #92400e;
+  }
+
+  .chip-btn.active .lev-pill {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+  }
+
+  .del-coin {
+    margin-left: 2px;
+    font-weight: 900;
+    opacity: 0.75;
+    padding: 0 3px;
+  }
+
+  .del-coin:hover {
+    opacity: 1;
+    color: #ef4444;
+  }
+
+  .input-box {
+    border: 1px solid var(--border-strong);
+    background: var(--surface-alt);
+    color: var(--text);
+    padding: 7px 10px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .ideal-badge {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* SESSION BANNER (NAIK/TURUN) */
+  .session-strip {
+    background: linear-gradient(135deg, #0f172a, #1e3a8a);
+    color: #ffffff;
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .session-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #fde047;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .session-opens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 12px;
+  }
+
+  .timer-card {
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 11px;
+    padding: 7px 14px;
+    text-align: right;
+  }
+
+  .timer-lbl {
+    font-size: 9px;
+    font-weight: 800;
+    color: #93c5fd;
+    text-transform: uppercase;
+  }
+
+  .timer-val {
+    font-size: 20px;
+    font-weight: 900;
+    color: #fde047;
+  }
+
+  /* SIGNAL RESULT CARD */
+  .signal-card {
+    background: var(--surface);
+    border: 2px solid var(--primary);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-md);
+  }
+
+  .signal-card.border-green { border-color: #10b981; }
+  .signal-card.border-amber { border-color: #f59e0b; }
+  .signal-card.border-red { border-color: #ef4444; }
+
+  .sig-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+
+  .sig-title {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--primary);
+  }
+
+  .conf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 900;
+  }
+
+  .conf-badge.green {
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1.5px solid #10b981;
+  }
+
+  .conf-badge.amber {
+    background: var(--amber-bg);
+    color: #b45309;
+    border: 1.5px solid #f59e0b;
+  }
+
+  .conf-badge.red {
+    background: var(--red-bg);
+    color: var(--red);
+    border: 1.5px solid #ef4444;
+  }
+
+  /* NAIK/TURUN RESULT CARDS */
+  .ud-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 10px;
+  }
+
+  .ud-item {
+    border-radius: 13px;
+    padding: 12px;
+    border: 2px solid var(--border);
+    background: var(--surface-alt);
+  }
+
+  .ud-item.green {
+    background: var(--green-bg);
+    border-color: #10b981;
+  }
+
+  .ud-item.amber {
+    background: var(--amber-bg);
+    border-color: #f59e0b;
+  }
+
+  .ud-item.red {
+    background: var(--red-bg);
+    border-color: #ef4444;
+  }
+
+  /* MUAK ULTIMATE GRID */
+  .muak-cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .muak-panel {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .muak-panel.long {
+    background: var(--green-bg);
+    border-color: var(--green-border);
+  }
+
+  .muak-panel.short {
+    background: var(--red-bg);
+    border-color: var(--red-border);
+  }
+
+  .muak-panel h4 {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .muak-panel ul {
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .final-bar {
+    background: #0f172a;
+    color: #f8fafc;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .lvl-tag {
+    background: rgba(255, 255, 255, 0.12);
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+  }
+
+  /* SYMMETRICAL 2x2 & 3-COL CHARTS GRID */
+  .charts-matrix {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .charts-matrix.cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (max-width: 960px) {
+    .charts-matrix, .charts-matrix.cols-3 {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .chart-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .chart-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .tf-pill {
+    background: var(--primary);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+
+  .ind-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .canvas-holder {
+    width: 100%;
+    height: 245px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  canvas.kline-cv {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* 4-BOX MULTI-FACTOR FOOTER (ZERO TRUNCATION) */
+  .analysis-footer {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .analysis-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--border-strong);
+  }
+
+  .regime-badge {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .regime-badge.bull {
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid var(--green-border);
+  }
+
+  .regime-badge.bear {
+    background: var(--red-bg);
+    color: var(--red);
+    border: 1px solid var(--red-border);
+  }
+
+  .regime-badge.neutral {
+    background: var(--amber-bg);
+    color: #b45309;
+    border: 1px solid var(--amber-border);
+  }
+
+  .score-tag {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--primary);
+    background: var(--primary-soft);
+    border: 1px solid var(--primary-border);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  .factors-2x2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  @media (max-width: 560px) {
+    .factors-2x2 {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .f-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 11px;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+
+  .f-title {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .f-body {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* MODALS & TOAST */
+  .modal-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.58);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    z-index: 60;
+  }
+
+  .modal-mask.open {
+    display: flex;
+  }
+
+  .modal-box {
+    background: var(--surface);
+    border-radius: 16px;
+    max-width: 720px;
+    width: 100%;
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 16px;
+    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.25);
+  }
+
+  .modal-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+
+  .toast-msg {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background: #0f172a;
+    color: #ffffff;
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    z-index: 80;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .toast-msg.show {
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo-box">H2.4</div>
+        <div>
+          <div class="brand-title">HarCript <span class="ver-badge">v2.4</span></div>
+          <div class="brand-sub">Pure Momentum Naik/Turun &amp; MASTER CALL MUAK ULTIMATE</div>
+        </div>
+      </div>
+
+      <div class="mode-tabs">
+        <button id="tabUpDown" class="mode-tab active" onclick="switchMode('updown')">🎯 Mode Naik / Turun</button>
+        <button id="tabFutures" class="mode-tab" onclick="switchMode('futures')">📈 Mode Futures (MUAK ULTIMATE)</button>
+      </div>
+
+      <div class="header-status-group">
+        <button class="btn" onclick="openTradeLogModal()">📒 Quick Log <span id="logCounter" class="ver-badge">0</span></button>
+
+        <div class="live-ticker-pill">
+          <div class="ticker-top">
+            <span id="hdrPair" class="ticker-sym mono">BTCUSDT</span>
+            <span id="hdrPrice" class="ticker-val mono">--.--</span>
+          </div>
+          <div class="ticker-sub mono">
+            <span id="hdrChange" style="color:var(--green);font-weight:800;">+0.00%</span>
+            <span>|</span>
+            <span id="hdrRange">H:-- L:--</span>
+            <span>|</span>
+            <span id="hdrClock">--:--:-- WIB</span>
+          </div>
+        </div>
+
+        <div id="nodeBadge" class="node-pill">
+          <span class="node-dot"></span>
+          <span id="nodeText">Connecting...</span>
+        </div>
+
+        <button id="btnSync" class="btn btn-sync" onclick="forceSyncNow()" title="Sinkronkan ulang harga &amp; chart">
+          <span class="sync-spin">🔄</span> Sync Harga
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-wrap">
+    <!-- SUBBAR: UP/DOWN CONTROLS OR FUTURES WATCHLIST -->
+    <section class="panel-bar">
+      <!-- UP/DOWN SUBBAR -->
+      <div id="udControlsBar" class="flex-row" style="width:100%;justify-content:space-between;">
+        <div class="flex-row" id="udDurGroup">
+          <button class="chip-btn active" data-dur="5m" onclick="selectUdDur('5m')">⏱ 5 Menit</button>
+          <button class="chip-btn" data-dur="15m" onclick="selectUdDur('15m')">⏱ 15 Menit</button>
+          <button class="chip-btn" data-dur="1h" onclick="selectUdDur('1h')">⏱ 1 Jam</button>
+          <button class="chip-btn" data-dur="1d" onclick="selectUdDur('1d')">⏱ 1 Hari — Reset 23:00 WIB</button>
+        </div>
+
+        <div class="flex-row">
+          <span style="font-size:11px;font-weight:700;color:var(--text-muted);">Tampilan:</span>
+          <button id="btnUdPerTime" class="chip-btn active" onclick="selectUdView('per_time')">⚡ Per Waktu (BTC • ETH • BNB)</button>
+          <button id="btnUdPerCoin" class="chip-btn" onclick="selectUdView('per_coin')">🪙 Per Koin (4 Durasi)</button>
+        </div>
+      </div>
+
+      <!-- COIN WATCHLIST (SHOWN IN FUTURES OR UP/DOWN PER-COIN) -->
+      <div id="coinSelectorBar" class="flex-row hidden" style="width:100%;justify-content:space-between;">
+        <div id="coinChipsList" class="flex-row"></div>
+        <div id="addCoinGroup" class="flex-row">
+          <input id="customCoinInput" class="input-box mono" style="width:125px;" placeholder="DOGE / SUI..." maxlength="12" />
+          <button class="btn" onclick="addCoinToWatchlist()">+ Tambah Koin</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTION BAR -->
+    <section class="panel-bar">
+      <div class="flex-row">
+        <button class="btn btn-gaskan" onclick="handleGaskanClick()">
+          ⚡ GASKAN PnL <span id="gaskanBadge" class="gaskan-chip">3 KOIN SEARAH</span>
+        </button>
+
+        <button id="btnCekkan" class="btn btn-amber hidden" onclick="openCekkanModal()">📊 Cekkan PnL</button>
+
+        <div id="idealWindowPill" class="ideal-badge">
+          <span>⏰</span>
+          <span id="idealWindowTxt">Klik Ideal 5m: Menit ke-1 s/d ke-2 sesi (Sisa 3-4 mnt)</span>
+        </div>
+      </div>
+
+      <div class="flex-row">
+        <span id="levInfoBadge" class="ver-badge mono hidden" style="font-size:11px;">Max Leverage BTCUSDT: 125x</span>
+        <button class="btn" onclick="clearOverlayLines()">🧹 Reset Garis</button>
+        <button class="btn btn-dark" onclick="copyLiveSnapshot()">📋 Salin Data Live</button>
+      </div>
+    </section>
+
+    <!-- UP/DOWN LIVE SESSION BANNER -->
+    <section id="udSessionStrip" class="session-strip">
+      <div>
+        <div class="session-title">
+          <span id="udStripHeading">3 KOIN SERENTAK (BTC • ETH • BNB) • SESI 5 MENIT (PURE MOMENTUM FOLLOWER)</span>
+          <span id="udSafetyZone" class="ver-badge">🟢 ZONA IDEAL</span>
+        </div>
+        <div id="udOpensRow" class="session-opens mono">
+          <span>Open BTC: <strong>--</strong></span>
+          <span>Open ETH: <strong>--</strong></span>
+          <span>Open BNB: <strong>--</strong></span>
+        </div>
+      </div>
+      <div class="timer-card">
+        <div class="timer-lbl">SISA WAKTU SESI (WIB)</div>
+        <div id="udCountdown" class="timer-val mono">00:00</div>
+      </div>
+    </section>
+
+    <!-- SIGNAL OUTPUT PANEL -->
+    <section id="signalOutputPanel" class="signal-card hidden"></section>
+
+    <!-- SYMMETRIC CHARTS GRID -->
+    <section id="chartsMatrix" class="charts-matrix cols-3"></section>
+  </main>
+
+  <!-- MODAL: CEKKAN PnL -->
+  <div id="cekkanModal" class="modal-mask">
+    <div class="modal-box">
+      <div class="modal-top">
+        <strong style="font-size:15px;">📊 Cekkan PnL &amp; Evaluasi Posisi Aktif (MUAK Check)</strong>
+        <button class="btn" onclick="closeModal('cekkanModal')">✕ Tutup</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);">Arah Posisi</label>
+          <select id="cSide" class="input-box" style="width:100%;margin-top:4px;" onchange="computePnL()">
+            <option value="LONG">LONG 🟢</option>
+            <option value="SHORT">SHORT 🔴</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);">Margin (USDT)</label>
+          <input id="cMargin" type="number" class="input-box mono" style="width:100%;margin-top:4px;" value="25" oninput="computePnL()" />
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);">Leverage (x)</label>
+          <input id="cLev" type="number" class="input-box mono" style="width:100%;margin-top:4px;" value="125" oninput="computePnL()" />
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);">Harga Entry</label>
+          <input id="cEntry" type="number" step="any" class="input-box mono" style="width:100%;margin-top:4px;" oninput="computePnL()" />
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);">Target TP</label>
+          <input id="cTp" type="number" step="any" class="input-box mono" style="width:100%;margin-top:4px;" oninput="computePnL()" />
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);">Stop Loss (SL)</label>
+          <input id="cSl" type="number" step="any" class="input-box mono" style="width:100%;margin-top:4px;" oninput="computePnL()" />
+        </div>
+      </div>
+      <div id="cResultBox" class="muak-panel mono" style="font-size:12px;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: QUICK TRADE LOG -->
+  <div id="tradeLogModal" class="modal-mask">
+    <div class="modal-box">
+      <div class="modal-top">
+        <strong style="font-size:15px;">📒 Quick Trade Log (Tersimpan Lokal)</strong>
+        <button class="btn" onclick="closeModal('tradeLogModal')">✕ Tutup</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:6px;margin-bottom:10px;">
+        <input id="lSym" class="input-box mono" style="width:100%;" placeholder="Pair (BNBUSDT)" />
+        <select id="lDir" class="input-box" style="width:100%;">
+          <option value="NAIK">NAIK ▲</option>
+          <option value="TURUN">TURUN ▼</option>
+          <option value="LONG">LONG 🟢</option>
+          <option value="SHORT">SHORT 🔴</option>
+        </select>
+        <input id="lEntry" type="text" class="input-box mono" style="width:100%;" placeholder="Entry / Durasi" />
+        <select id="lRes" class="input-box" style="width:100%;">
+          <option value="WIN">WIN ✅</option>
+          <option value="LOSS">LOSS ❌</option>
+        </select>
+        <input id="lPnl" type="number" step="any" class="input-box mono" style="width:100%;" placeholder="PnL (+18 / -10)" />
+      </div>
+      <div style="margin-bottom:12px;">
+        <button class="btn btn-gaskan" onclick="saveNewLog()">+ Simpan Catatan</button>
+      </div>
+      <div id="logSummaryBox" class="muak-panel mono" style="margin-bottom:10px;font-size:12px;"></div>
+      <div id="logItemsList" style="display:flex;flex-direction:column;gap:6px;font-size:12px;"></div>
+    </div>
+  </div>
+
+  <div id="toastBox" class="toast-msg"></div>
+
+<script>
+(function() {
+  "use strict";
+
+  // =========================================================================
+  // 1. ANTI-BLOCKING CELLULAR AUTO-FAILOVER ROUTER (2.2s TIMEOUT PER NODE)
+  // =========================================================================
+  var API_NODES = [
+    { name: "Binance Futures", rest: "https://fapi.binance.com/fapi/v1" },
+    { name: "Vision Live", rest: "https://data-api.binance.vision/api/v3" },
+    { name: "API1 Mirror", rest: "https://api1.binance.com/api/v3" },
+    { name: "API2 Mirror", rest: "https://api2.binance.com/api/v3" },
+    { name: "API3 Mirror", rest: "https://api3.binance.com/api/v3" }
+  ];
+
+  var MAX_LEV = {
+    BTCUSDT: 125,
+    ETHUSDT: 100,
+    BNBUSDT: 75,
+    SOLUSDT: 75,
+    XRPUSDT: 75,
+    INITUSDT: 50
+  };
+
+  var CORE_3 = ["BTCUSDT", "ETHUSDT", "BNBUSDT"];
+  var DEFAULT_COINS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "INITUSDT"];
+
+  var app = {
+    mode: "updown",
+    udDur: "5m",
+    udView: "per_time",
+    futCoin: "BTCUSDT",
+    udCoin: "BTCUSDT",
+    watchlist: readStore("hc24_watchlist", DEFAULT_COINS),
+    logs: readStore("hc24_logs", []),
+    nodeIdx: 0,
+    lastLatencyMs: 0,
+    prices: {},
+    klines: {},
+    overlayLines: [],
+    muakExpiryMs: 0,
+    lastMuak: null
+  };
+
+  function readStore(key, fallback) {
+    try {
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function writeStore(key, val) {
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+    } catch (e) {}
+  }
+
+  function toast(msg) {
+    var el = document.getElementById("toastBox");
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(el._timer);
+    el._timer = setTimeout(function() {
+      el.classList.remove("show");
+    }, 2600);
+  }
+
+  function getLev(sym) {
+    return MAX_LEV[sym] || 50;
+  }
+
+  function fmtP(val) {
+    if (val === null || val === undefined || isNaN(val) || Number(val) === 0) return "--.--";
+    var n = Number(val);
+    if (n >= 1000) return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (n >= 10) return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 3 });
+    if (n >= 0.1) return n.toLocaleString("en-US", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+    return n.toLocaleString("en-US", { minimumFractionDigits: 5, maximumFractionDigits: 6 });
+  }
+
+  function fmtK(num) {
+    var abs = Math.abs(num);
+    if (abs >= 1e6) return (num / 1e6).toFixed(2) + "M";
+    if (abs >= 1e3) return (num / 1e3).toFixed(1) + "K";
+    return num.toFixed(0);
+  }
+
+  async function apiGet(path) {
+    var count = API_NODES.length;
+    for (var i = 0; i < count; i++) {
+      var idx = (app.nodeIdx + i) % count;
+      var node = API_NODES[idx];
+      var t0 = performance.now();
+      var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      var to = ctrl ? setTimeout(function() { ctrl.abort(); }, 2200) : null;
+      try {
+        var opts = { cache: "no-store" };
+        if (ctrl) opts.signal = ctrl.signal;
+        var res = await fetch(node.rest + path, opts);
+        if (to) clearTimeout(to);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        var json = await res.json();
+        app.nodeIdx = idx;
+        app.lastLatencyMs = Math.max(12, Math.round(performance.now() - t0));
+        refreshNodeBadge(true);
+        return json;
+      } catch (e) {
+        if (to) clearTimeout(to);
+      }
+    }
+    refreshNodeBadge(false);
+    throw new Error("Node timeout");
+  }
+
+  function refreshNodeBadge(ok) {
+    var badge = document.getElementById("nodeBadge");
+    var txt = document.getElementById("nodeText");
+    if (!badge || !txt) return;
+    var node = API_NODES[app.nodeIdx] || API_NODES[0];
+    if (ok) {
+      badge.classList.remove("warn");
+      txt.textContent = node.name + " • " + app.lastLatencyMs + "ms";
+    } else {
+      badge.classList.add("warn");
+      txt.textContent = "Reconnecting...";
+    }
+  }
+
+  // =========================================================================
+  // 2. UNIFIED 1-SECOND PRICE POLLING & CHART CANDLE SYNC
+  // =========================================================================
+  function getActiveSymbols() {
+    var map = {};
+    CORE_3.forEach(function(s) { map[s] = true; });
+    map[app.mode === "futures" ? app.futCoin : app.udCoin] = true;
+    return Object.keys(map);
+  }
+
+  function applyPriceUpdate(sym, price, chgPct, h24, l24) {
+    if (!price || isNaN(price)) return;
+    var p = Number(price);
+    var prev = app.prices[sym] || {};
+    app.prices[sym] = {
+      price: p,
+      chgPct: (chgPct !== undefined && !isNaN(chgPct)) ? Number(chgPct) : (prev.chgPct || 0),
+      h24: (h24 && !isNaN(h24)) ? Number(h24) : (prev.h24 || p),
+      l24: (l24 && !isNaN(l24)) ? Number(l24) : (prev.l24 || p)
+    };
+
+    Object.keys(app.klines).forEach(function(k) {
+      if (k.indexOf(sym + "_") === 0) {
+        var arr = app.klines[k];
+        if (arr && arr.length > 0) {
+          var last = arr[arr.length - 1];
+          last.close = p;
+          if (p > last.high) last.high = p;
+          if (p < last.low) last.low = p;
+        }
+      }
+    });
+
+    var currentSym = app.mode === "futures" ? app.futCoin : app.udCoin;
+    if (sym === currentSym) {
+      updateTopTicker();
+    }
+  }
+
+  function updateTopTicker() {
+    var sym = app.mode === "futures" ? app.futCoin : app.udCoin;
+    var pairEl = document.getElementById("hdrPair");
+    var valEl = document.getElementById("hdrPrice");
+    var chgEl = document.getElementById("hdrChange");
+    var rngEl = document.getElementById("hdrRange");
+    if (pairEl) pairEl.textContent = sym;
+
+    var info = app.prices[sym];
+    if (info && valEl && chgEl) {
+      valEl.textContent = fmtP(info.price);
+      var sign = info.chgPct >= 0 ? "+" : "";
+      chgEl.textContent = sign + info.chgPct.toFixed(2) + "%";
+      chgEl.style.color = info.chgPct >= 0 ? "var(--green)" : "var(--red)";
+      if (rngEl) rngEl.textContent = "H:" + fmtP(info.h24) + " L:" + fmtP(info.l24);
+    }
+  }
+
+  async function syncPrices1s() {
+    var syms = getActiveSymbols();
+    await Promise.all(syms.map(async function(sym) {
+      try {
+        var data = await apiGet("/ticker/24hr?symbol=" + sym);
+        if (data && data.lastPrice) {
+          applyPriceUpdate(
+            sym,
+            parseFloat(data.lastPrice),
+            parseFloat(data.priceChangePercent),
+            parseFloat(data.highPrice),
+            parseFloat(data.lowPrice)
+          );
+        }
+      } catch (e) {}
+    }));
+    renderAllCharts();
+    if (app.mode === "updown") updateUpDownBanner();
+  }
+
+  async function loadKlines(sym, tf, limit) {
+    // Pull up to 260 candles for accurate EMA(99) warmup; visual screen window = 172 candles
+    var lim = limit || 260;
+    try {
+      var raw = await apiGet("/klines?symbol=" + sym + "&interval=" + tf + "&limit=" + lim);
+      if (Array.isArray(raw) && raw.length > 0) {
+        var parsed = raw.map(function(r) {
+          return {
+            time: Number(r[0]),
+            open: parseFloat(r[1]),
+            high: parseFloat(r[2]),
+            low: parseFloat(r[3]),
+            close: parseFloat(r[4]),
+            volume: parseFloat(r[5])
+          };
+        });
+        var live = app.prices[sym];
+        if (live && live.price) {
+          var last = parsed[parsed.length - 1];
+          last.close = live.price;
+          if (live.price > last.high) last.high = live.price;
+          if (live.price < last.low) last.low = live.price;
+        }
+        app.klines[sym + "_" + tf] = parsed;
+        return parsed;
+      }
+    } catch (e) {}
+    return app.klines[sym + "_" + tf] || [];
+  }
+
+  async function refreshAllVisibleKlines() {
+    if (app.mode === "futures") {
+      await Promise.all(["5m", "15m", "30m", "1h"].map(function(tf) {
+        return loadKlines(app.futCoin, tf, 260);
+      }));
+    } else {
+      if (app.udView === "per_time") {
+        await Promise.all(CORE_3.map(function(s) {
+          return loadKlines(s, app.udDur, 260);
+        }));
+      } else {
+        await Promise.all(["5m", "15m", "1h", "1d"].map(function(tf) {
+          return loadKlines(app.udCoin, tf, 260);
+        }));
+      }
+    }
+    renderAllCharts();
+    if (app.mode === "updown") updateUpDownBanner();
+  }
+
+  window.forceSyncNow = async function() {
+    var btn = document.getElementById("btnSync");
+    if (btn) btn.classList.add("spinning");
+    toast("Menyinkronkan harga live & grafik...");
+    await syncPrices1s();
+    await refreshAllVisibleKlines();
+    setTimeout(function() {
+      if (btn) btn.classList.remove("spinning");
+      toast("Harga & grafik 100% sinkron!");
+    }, 400);
+  };
+
+  // =========================================================================
+  // 3. TECHNICAL INDICATORS (172-CANDLE SCREEN ENGINE + 36-54 LOCAL SWING)
+  // =========================================================================
+  function calcEMA(arr, period) {
+    if (!arr || arr.length === 0) return [];
+    var k = 2 / (period + 1);
+    var out = [arr[0]];
+    for (var i = 1; i < arr.length; i++) {
+      out.push(arr[i] * k + out[i - 1] * (1 - k));
+    }
+    return out;
+  }
+
+  function calcRSI(closes, period) {
+    var p = period || 6;
+    if (!closes || closes.length < p + 1) return 50;
+    var g = 0, l = 0;
+    for (var i = 1; i <= p; i++) {
+      var d = closes[i] - closes[i - 1];
+      if (d >= 0) g += d; else l -= d;
+    }
+    var avgG = g / p, avgL = l / p;
+    for (var j = p + 1; j < closes.length; j++) {
+      var diff = closes[j] - closes[j - 1];
+      avgG = (avgG * (p - 1) + (diff >= 0 ? diff : 0)) / p;
+      avgL = (avgL * (p - 1) + (diff < 0 ? -diff : 0)) / p;
+    }
+    if (avgL === 0) return 100;
+    return 100 - (100 / (1 + avgG / avgL));
+  }
+
+  function calcATR(candles, period) {
+    var p = period || 14;
+    if (!candles || candles.length < p + 1) return 0;
+    var trs = [];
+    for (var i = 1; i < candles.length; i++) {
+      var c = candles[i], prev = candles[i - 1];
+      trs.push(Math.max(c.high - c.low, Math.abs(c.high - prev.close), Math.abs(c.low - prev.close)));
+    }
+    var emaTr = calcEMA(trs, p);
+    return emaTr[emaTr.length - 1] || 0;
+  }
+
+  function calcADX(candles, period) {
+    var p = period || 14;
+    if (!candles || candles.length < p * 2) return 20;
+    var trs = [], pDM = [], mDM = [];
+    for (var i = 1; i < candles.length; i++) {
+      var c = candles[i], prev = candles[i - 1];
+      trs.push(Math.max(c.high - c.low, Math.abs(c.high - prev.close), Math.abs(c.low - prev.close)));
+      var up = c.high - prev.high;
+      var dn = prev.low - c.low;
+      pDM.push(up > dn && up > 0 ? up : 0);
+      mDM.push(dn > up && dn > 0 ? dn : 0);
+    }
+    var sTR = calcEMA(trs, p);
+    var sP = calcEMA(pDM, p);
+    var sM = calcEMA(mDM, p);
+    var dxs = [];
+    for (var j = 0; j < sTR.length; j++) {
+      var pdi = sTR[j] ? (sP[j] / sTR[j]) * 100 : 0;
+      var mdi = sTR[j] ? (sM[j] / sTR[j]) * 100 : 0;
+      var sum = pdi + mdi;
+      dxs.push(sum ? (Math.abs(pdi - mdi) / sum) * 100 : 0);
+    }
+    var adxArr = calcEMA(dxs, p);
+    return adxArr[adxArr.length - 1] || 20;
+  }
+
+  function calcOBV(candles) {
+    if (!candles || candles.length < 15) return { obv: 0, ema10: 0, bullish: false };
+    var series = [0];
+    for (var i = 1; i < candles.length; i++) {
+      var prev = series[i - 1];
+      if (candles[i].close > candles[i - 1].close) series.push(prev + candles[i].volume);
+      else if (candles[i].close < candles[i - 1].close) series.push(prev - candles[i].volume);
+      else series.push(prev);
+    }
+    var e10 = calcEMA(series, 10);
+    var obv = series[series.length - 1];
+    var ema10 = e10[e10.length - 1];
+    return { obv: obv, ema10: ema10, bullish: obv >= ema10 };
+  }
+
+  function analyzeCandles(candles) {
+    if (!candles || candles.length < 30) {
+      return {
+        close: 0, open: 0, high: 0, low: 0,
+        ema7: 0, ema25: 0, ema99: 0,
+        rsi6: 50, adx14: 20, atr14: 0,
+        obv: { obv: 0, ema10: 0, bullish: false },
+        volCur: 0, volMa5: 0,
+        swingHigh: 0, swingLow: 0,
+        localHigh36: 0, localLow36: 0,
+        localHigh54: 0, localLow54: 0,
+        screenHigh172: 0, screenLow172: 0,
+        ema7Arr: [], ema25Arr: [], ema99Arr: [],
+        footer: {
+          regime: "SIDEWAYS",
+          cls: "neutral",
+          bullPts: 0,
+          bearPts: 0,
+          emaTxt: "Memuat data candle...",
+          obvTxt: "Memuat OBV...",
+          momTxt: "Memuat RSI(6) & ADX(14)...",
+          volTxt: "Memuat Volume..."
+        }
+      };
+    }
+
+    // Warmup indicators on full history, then lock structural screen view to exact 172 candles
+    var closes = candles.map(function(c) { return c.close; });
+    var ema7Arr = calcEMA(closes, 7);
+    var ema25Arr = calcEMA(closes, 25);
+    var ema99Arr = calcEMA(closes, 99);
+
+    var screen172 = candles.slice(-172);
+    var last = screen172[screen172.length - 1];
+    var recent36 = screen172.slice(-36);
+    var recent54 = screen172.slice(-54);
+
+    var localHigh36 = Math.max.apply(null, recent36.map(function(c) { return c.high; }));
+    var localLow36 = Math.min.apply(null, recent36.map(function(c) { return c.low; }));
+    var localHigh54 = Math.max.apply(null, recent54.map(function(c) { return c.high; }));
+    var localLow54 = Math.min.apply(null, recent54.map(function(c) { return c.low; }));
+    var screenHigh172 = Math.max.apply(null, screen172.map(function(c) { return c.high; }));
+    var screenLow172 = Math.min.apply(null, screen172.map(function(c) { return c.low; }));
+
+    var last5 = screen172.slice(-5).map(function(c) { return c.volume; });
+    var volMa5 = last5.reduce(function(a, b) { return a + b; }, 0) / last5.length;
+
+    var e7 = ema7Arr[ema7Arr.length - 1];
+    var e25 = ema25Arr[ema25Arr.length - 1];
+    var e99 = ema99Arr[ema99Arr.length - 1];
+    var rsi6 = calcRSI(closes, 6);
+    var adx14 = calcADX(screen172, 14);
+    var atr14 = calcATR(screen172, 14);
+    var obv = calcOBV(candles);
+
+    var bullPts = 0, bearPts = 0;
+    if (last.close > e25 && e7 > e25) bullPts++;
+    else if (last.close < e25 && e7 < e25) bearPts++;
+
+    if (last.close > e99) bullPts++;
+    else if (last.close < e99) bearPts++;
+
+    if (obv.bullish) bullPts++;
+    else bearPts++;
+
+    if (rsi6 >= 52 && adx14 >= 18) bullPts++;
+    else if (rsi6 <= 48 && adx14 >= 18) bearPts++;
+
+    var vRatio = volMa5 > 0 ? last.volume / volMa5 : 1;
+    if (vRatio >= 0.9 && last.close >= last.open) bullPts++;
+    else if (vRatio >= 0.9 && last.close < last.open) bearPts++;
+
+    var regime = "SIDEWAYS", cls = "neutral";
+    if (bullPts >= 3 && bullPts > bearPts) { regime = "BULLISH"; cls = "bull"; }
+    else if (bearPts >= 3 && bearPts > bullPts) { regime = "BEARISH"; cls = "bear"; }
+
+    var emaTxt;
+    if (last.close > e7 && e7 > e25 && e25 > e99) {
+      emaTxt = "Uptrend Penuh: Harga > E7 (" + fmtP(e7) + ") > E25 (" + fmtP(e25) + ") > E99 (" + fmtP(e99) + ")";
+    } else if (last.close < e7 && e7 < e25 && e25 < e99) {
+      emaTxt = "Breakdown Penuh: Harga < E7 (" + fmtP(e7) + ") < E25 (" + fmtP(e25) + ") < E99 (" + fmtP(e99) + ")";
+    } else if (last.close > e99 && e7 > e99) {
+      emaTxt = "Breakout Bullish: Harga & E7 (" + fmtP(e7) + ") > E99 (" + fmtP(e99) + ") | E25: " + fmtP(e25);
+    } else if (last.close < e99 && e7 < e99) {
+      emaTxt = "Breakdown Bearish: Harga & E7 (" + fmtP(e7) + ") < E99 (" + fmtP(e99) + ") | E25: " + fmtP(e25);
+    } else if (last.close > e25 && e7 > e25) {
+      emaTxt = "Momentum Naik: Harga > E7 (" + fmtP(e7) + ") > E25 (" + fmtP(e25) + ") | E99: " + fmtP(e99);
+    } else if (last.close < e25 && e7 < e25) {
+      emaTxt = "Tekanan Turun: Harga < E7 (" + fmtP(e7) + ") < E25 (" + fmtP(e25) + ") | E99: " + fmtP(e99);
+    } else {
+      emaTxt = "Konsolidasi: E7 " + fmtP(e7) + " | E25 " + fmtP(e25) + " | E99 " + fmtP(e99);
+    }
+
+    var obvTxt = (obv.bullish ? "Akumulasi Aktif" : "Distribusi Aktif") +
+      " (" + fmtK(obv.obv) + (obv.bullish ? " > " : " < ") + "EMA10 " + fmtK(obv.ema10) + ")";
+
+    var rsiLbl = rsi6 >= 70 ? "Overbought" : (rsi6 <= 30 ? "Oversold" : (rsi6 >= 50 ? "Bullish Zone" : "Bearish Zone"));
+    var adxLbl = adx14 >= 25 ? "Tren Kuat" : (adx14 >= 20 ? "Terarah" : "Sideways");
+    var momTxt = "RSI(6): " + rsi6.toFixed(1) + " (" + rsiLbl + ") • ADX(14): " + adx14.toFixed(1) + " (" + adxLbl + ")";
+
+    var volLbl = vRatio >= 1.15 ? "Vol Tinggi" : (vRatio >= 0.85 ? "Vol Normal" : "Vol Menyusut");
+    var activeScore = Math.max(bullPts, bearPts);
+    var volTxt = volLbl + " (" + fmtK(last.volume) + " vs MA5 " + fmtK(volMa5) + ") • Skor " + activeScore + "/5";
+
+    return {
+      close: last.close, open: last.open, high: last.high, low: last.low,
+      ema7: e7, ema25: e25, ema99: e99,
+      rsi6: rsi6, adx14: adx14, atr14: atr14,
+      obv: obv, volCur: last.volume, volMa5: volMa5,
+      swingHigh: localHigh36, swingLow: localLow36,
+      localHigh36: localHigh36, localLow36: localLow36,
+      localHigh54: localHigh54, localLow54: localLow54,
+      screenHigh172: screenHigh172, screenLow172: screenLow172,
+      ema7Arr: ema7Arr, ema25Arr: ema25Arr, ema99Arr: ema99Arr,
+      footer: {
+        regime: regime,
+        cls: cls,
+        bullPts: bullPts,
+        bearPts: bearPts,
+        emaTxt: emaTxt,
+        obvTxt: obvTxt,
+        momTxt: momTxt,
+        volTxt: volTxt
+      }
+    };
+  }
+
+  // =========================================================================
+  // 4. MODE NAIK / TURUN ENGINE (100% PURE MOMENTUM & TREND FOLLOWER)
+  // =========================================================================
+  var UD_TF_MAP = {
+    "5m": ["1m", "5m", "15m"],
+    "15m": ["3m", "15m", "1h"],
+    "1h": ["15m", "1h", "4h"],
+    "1d": ["1h", "4h", "1d"]
+  };
+
+  function getSessionRemainingInfo(dur) {
+    var wib = getWibDate();
+    var m = wib.getMinutes();
+    var s = wib.getSeconds();
+    var h = wib.getHours();
+
+    if (dur === "5m") {
+      var mod5 = m % 5;
+      var rem5 = (4 - mod5) * 60 + (60 - s);
+      var nextM5 = m - mod5 + 5;
+      var nextH5 = h + Math.floor(nextM5 / 60);
+      var nextStr5 = String(nextH5 % 24).padStart(2, "0") + ":" + String((nextM5 % 60) + 1).padStart(2, "0") + " WIB";
+      return { remSec: rem5, tooLate: rem5 < 90, nextIdeal: nextStr5 };
+    }
+    if (dur === "15m") {
+      var mod15 = m % 15;
+      var rem15 = (14 - mod15) * 60 + (60 - s);
+      var nextM15 = m - mod15 + 15;
+      var nextH15 = h + Math.floor(nextM15 / 60);
+      var nextStr15 = String(nextH15 % 24).padStart(2, "0") + ":" + String((nextM15 % 60) + 2).padStart(2, "0") + " WIB";
+      return { remSec: rem15, tooLate: rem15 < 240, nextIdeal: nextStr15 };
+    }
+    if (dur === "1h") {
+      var rem1h = (59 - m) * 60 + (60 - s);
+      var nextStr1h = String((h + 1) % 24).padStart(2, "0") + ":05 WIB";
+      return { remSec: rem1h, tooLate: rem1h < 900, nextIdeal: nextStr1h };
+    }
+    var target = new Date(wib);
+    target.setHours(23, 0, 0, 0);
+    if (h >= 23) target.setDate(target.getDate() + 1);
+    var rem1d = Math.max(0, Math.floor((target - wib) / 1000));
+    return { remSec: rem1d, tooLate: rem1d < 7200, nextIdeal: "07:00 - 14:00 WIB" };
+  }
+
+  async function evaluatePureMomentumUpDown(sym, dur) {
+    var tfs = UD_TF_MAP[dur] || ["1m", "5m", "15m"];
+    var sets = await Promise.all(tfs.map(function(tf) {
+      return loadKlines(sym, tf, 220);
+    }));
+
+    var aTrig = analyzeCandles(sets[0]);
+    var aSess = analyzeCandles(sets[1]);
+    var aMacro = analyzeCandles(sets[2]);
+
+    var livePrice = (app.prices[sym] && app.prices[sym].price) || aSess.close;
+    var openPrice = aSess.open || livePrice;
+    var diffPct = openPrice > 0 ? ((livePrice - openPrice) / openPrice) * 100 : 0;
+    var distAbs = Math.abs(livePrice - openPrice);
+    var atrRef = aSess.atr14 || (openPrice * 0.002);
+
+    var upScore = 0;
+    var dnScore = 0;
+
+    if (livePrice > openPrice) upScore += 32;
+    else if (livePrice < openPrice) dnScore += 32;
+
+    if (aTrig.close > aTrig.ema7 && aTrig.ema7 > aTrig.ema25) upScore += 26;
+    else if (aTrig.close < aTrig.ema7 && aTrig.ema7 < aTrig.ema25) dnScore += 26;
+    else if (aTrig.close > aTrig.ema25) upScore += 14;
+    else if (aTrig.close < aTrig.ema25) dnScore += 14;
+
+    if (aSess.close > aSess.ema25) upScore += 14; else dnScore += 14;
+    if (aSess.obv.bullish) upScore += 10; else dnScore += 10;
+
+    if (aMacro.close > aMacro.ema25) upScore += 18; else dnScore += 18;
+
+    var priceAboveOpen = livePrice > openPrice;
+    var bullishFlow = priceAboveOpen && aTrig.ema7 > aTrig.ema25 && aSess.close > aSess.ema25;
+    var bearishFlow = !priceAboveOpen && aTrig.ema7 < aTrig.ema25 && aSess.close < aSess.ema25;
+
+    var direction;
+    if (bullishFlow) {
+      direction = "NAIK";
+    } else if (bearishFlow) {
+      direction = "TURUN";
+    } else {
+      direction = upScore >= dnScore ? "NAIK" : "TURUN";
+    }
+
+    var confidence = Math.min(95, Math.max(48, Math.round(direction === "NAIK" ? upScore : dnScore)));
+    var warningNote = "";
+
+    if (aSess.adx14 < 20 && distAbs < atrRef * 0.35) {
+      confidence = Math.min(confidence, 55);
+      warningNote = "⏸️ Sideways (ADX " + aSess.adx14.toFixed(0) + " < 20) & jarak tipis ke Open — tahan dulu.";
+    }
+
+    var timing = getSessionRemainingInfo(dur);
+    if (timing.tooLate && ((direction === "NAIK" && aTrig.rsi6 > 78) || (direction === "TURUN" && aTrig.rsi6 < 22))) {
+      confidence = Math.min(confidence, 58);
+      warningNote = "⚠️ Sisa waktu sesi mepet & RSI ekstrem — tunggu sesi baru pukul " + timing.nextIdeal + ".";
+    } else if (timing.tooLate && confidence >= 80) {
+      confidence = 72;
+      warningNote = "🟡 Sisa waktu sesi tinggal sebentar — klik ideal berikutnya: " + timing.nextIdeal + ".";
+    }
+
+    if (!warningNote && direction === "NAIK" && aTrig.rsi6 > 84) {
+      confidence = Math.min(confidence, 68);
+      warningNote = "🟡 Momentum NAIK kuat tapi RSI(6) tinggi (" + aTrig.rsi6.toFixed(0) + ") — siap-siap retest tipis.";
+    } else if (!warningNote && direction === "TURUN" && aTrig.rsi6 < 16) {
+      confidence = Math.min(confidence, 68);
+      warningNote = "🟡 Momentum TURUN kuat tapi RSI(6) rendah (" + aTrig.rsi6.toFixed(0) + ") — siap-siap pantulan tipis.";
+    }
+
+    return {
+      sym: sym,
+      dur: dur,
+      tfs: tfs,
+      livePrice: livePrice,
+      openPrice: openPrice,
+      diffPct: diffPct,
+      direction: direction,
+      confidence: confidence,
+      warningNote: warningNote,
+      adx14: aSess.adx14,
+      rsi6: aTrig.rsi6,
+      obvBull: aSess.obv.bullish
+    };
+  }
+
+  async function executeUpDownAnalysis() {
+    toast("Menganalisa arah searah multi-TF (Pure Momentum)...");
+    var list = [];
+    if (app.udView === "per_time") {
+      list = await Promise.all(CORE_3.map(function(sym) {
+        return evaluatePureMomentumUpDown(sym, app.udDur);
+      }));
+    } else {
+      list = await Promise.all(["5m", "15m", "1h", "1d"].map(function(d) {
+        return evaluatePureMomentumUpDown(app.udCoin, d);
+      }));
+    }
+
+    var panel = document.getElementById("signalOutputPanel");
+    if (!panel) return;
+    panel.classList.remove("hidden", "border-green", "border-amber", "border-red");
+
+    var maxConf = Math.max.apply(null, list.map(function(x) { return x.confidence; }));
+    panel.classList.add(maxConf >= 80 ? "border-green" : (maxConf >= 60 ? "border-amber" : "border-red"));
+
+    var cards = list.map(function(item) {
+      var isUp = item.direction === "NAIK";
+      var tier = item.confidence >= 80 ? "green" : (item.confidence >= 60 ? "amber" : "red");
+      var tierTxt = item.confidence >= 80 ? "SINYAL KUAT" : (item.confidence >= 60 ? "SELEKTIF" : "TAHAN DULU");
+      var title = app.udView === "per_time"
+        ? item.sym.replace("USDT", "") + " • Sesi " + item.dur.toUpperCase()
+        : item.sym.replace("USDT", "") + " • Durasi " + item.dur.toUpperCase();
+
+      return [
+        '<div class="ud-item ' + tier + '">',
+        '  <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">',
+        '    <strong style="font-size:13px;">' + title + '</strong>',
+        '    <span class="conf-badge ' + tier + ' mono">' + item.confidence + '% • ' + tierTxt + '</span>',
+        '  </div>',
+        '  <div style="font-size:18px;font-weight:900;color:' + (isUp ? "var(--green)" : "var(--red)") + ';margin-bottom:6px;">',
+        '    ' + (isUp ? "▲ NAIK (CALL)" : "▼ TURUN (PUT)"),
+        '  </div>',
+        '  <div class="mono" style="font-size:11px;display:flex;flex-direction:column;gap:2px;">',
+        '    <div>Open Sesi: <strong>' + fmtP(item.openPrice) + '</strong></div>',
+        '    <div>Harga Live: <strong>' + fmtP(item.livePrice) + '</strong> (<span style="color:' + (item.diffPct >= 0 ? "var(--green)" : "var(--red)") + ';">' + (item.diffPct >= 0 ? "+" : "") + item.diffPct.toFixed(3) + '%</span>)</div>',
+        '    <div>3-TF: <strong>' + item.tfs.join(" + ").toUpperCase() + '</strong> | ADX: ' + item.adx14.toFixed(0) + ' | RSI6: ' + item.rsi6.toFixed(1) + ' | OBV: ' + (item.obvBull ? "Akumulasi" : "Distribusi") + '</div>',
+        '  </div>',
+        (item.warningNote ? '  <div style="margin-top:6px;font-size:10px;font-weight:800;color:#92400e;">' + item.warningNote + '</div>' : ''),
+        '</div>'
+      ].join("");
+    }).join("");
+
+    panel.innerHTML = [
+      '<div class="sig-head">',
+      '  <div>',
+      '    <div class="sig-title">🎯 HASIL ANALISA NAIK / TURUN (PURE MOMENTUM FOLLOWER)</div>',
+      '    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Anti-Melawan Arus Aktif • 🟢 ≥80% Sinyal Kuat Searah • 🟡 60–79% Selektif • 🔴 &lt;60% Tahan Dulu</div>',
+      '  </div>',
+      '  <button class="btn" onclick="hideSignalPanel()">✕ Tutup</button>',
+      '</div>',
+      '<div class="ud-grid">' + cards + '</div>'
+    ].join("");
+  }
+
+  // =========================================================================
+  // 5. MODE FUTURES ENGINE (172-CANDLE SCREEN-MATCHED MASTER CALL MUAK)
+  // =========================================================================
+  function getVolProfile(sym) {
+    if (sym === "BTCUSDT" || sym === "ETHUSDT") {
+      return {
+        slPct: 0.0070,
+        maxEntryDist: 0.0045,
+        tp1Cap: 0.0085,
+        tp2Cap: 0.0170,
+        label: "0.70%",
+        tag: "Anti-Jarum Mega-Cap (172-Candle)"
+      };
+    }
+    if (sym === "BNBUSDT" || sym === "SOLUSDT" || sym === "XRPUSDT") {
+      return {
+        slPct: 0.0105,
+        maxEntryDist: 0.0065,
+        tp1Cap: 0.0120,
+        tp2Cap: 0.0230,
+        label: "1.05%",
+        tag: "Anti-Jarum Large-Cap (172-Candle)"
+      };
+    }
+    return {
+      slPct: 0.0145,
+      maxEntryDist: 0.0085,
+      tp1Cap: 0.0160,
+      tp2Cap: 0.0300,
+      label: "1.45%",
+      tag: "Anti-Jarum High-Vol Altcoin (172-Candle)"
+    };
+  }
+
+  async function executeFuturesMuakUltimate() {
+    var sym = app.futCoin;
+    toast("Menjalankan MASTER CALL MUAK ULTIMATE (" + sym + " • 172 Candle)...");
+
+    var sets = await Promise.all([
+      loadKlines(sym, "5m", 260),
+      loadKlines(sym, "15m", 260),
+      loadKlines(sym, "30m", 260),
+      loadKlines(sym, "1h", 260)
+    ]);
+
+    var a5 = analyzeCandles(sets[0]);
+    var a15 = analyzeCandles(sets[1]);
+    var a30 = analyzeCandles(sets[2]);
+    var a1h = analyzeCandles(sets[3]);
+
+    var live = app.prices[sym] || {
+      price: a5.close,
+      chgPct: 0,
+      h24: a15.localHigh54,
+      l24: a15.localLow54
+    };
+    var price = live.price || a5.close;
+    var h24 = live.h24 || a15.localHigh54;
+    var l24 = live.l24 || a15.localLow54;
+
+    // 1. MULTI-TF BIAS INCLUDING BREAKOUT TRANSITION (EMA7 > EMA99 > EMA25)
+    var bullPts = 0, bearPts = 0;
+
+    if (price > a1h.ema99 && a1h.ema7 > a1h.ema99) bullPts += 32;
+    else if (price < a1h.ema99 && a1h.ema7 < a1h.ema99) bearPts += 32;
+    else if (price > a1h.ema99) bullPts += 24;
+    else bearPts += 24;
+
+    if (price > a30.ema25 && a30.ema7 > a30.ema25) bullPts += 20;
+    else if (price < a30.ema25 && a30.ema7 < a30.ema25) bearPts += 20;
+    else if (price > a30.ema99) bullPts += 14;
+    else bearPts += 14;
+
+    if (price > a15.ema25 && a15.ema7 > a15.ema25) bullPts += (a15.adx14 >= 20 ? 20 : 15);
+    else if (price < a15.ema25 && a15.ema7 < a15.ema25) bearPts += (a15.adx14 >= 20 ? 20 : 15);
+    else if (price > a15.ema99) bullPts += 12;
+    else bearPts += 12;
+
+    if (a5.obv.bullish) bullPts += 14; else bearPts += 14;
+    if (a15.obv.bullish && a1h.obv.bullish) bullPts += 14;
+    else if (!a15.obv.bullish && !a1h.obv.bullish) bearPts += 14;
+    else if (a15.obv.bullish) bullPts += 7; else bearPts += 7;
+
+    var isLong = bullPts >= bearPts;
+    var confidence = Math.min(96, Math.max(52, Math.round(isLong ? bullPts : bearPts)));
+    var bias = isLong ? "LONG" : "SHORT";
+    var prof = getVolProfile(sym);
+
+    // 2. MAGNET ONE ENTRY DEKAT (EMA7 1H / EMA25 15M / EMA99 5M / EMA7 5M)
+    var entryPrice;
+    if (isLong) {
+      var minValidLong = price * (1 - prof.maxEntryDist);
+      var lCandidates = [a1h.ema7, a15.ema25, a5.ema99, a5.ema7, a1h.ema99].filter(function(v) {
+        return v >= minValidLong && v <= price * 1.0005;
+      });
+      if (lCandidates.length > 0) {
+        entryPrice = lCandidates.reduce(function(s, v) { return s + v; }, 0) / lCandidates.length;
+      } else {
+        entryPrice = price * (1 - prof.maxEntryDist * 0.55);
+      }
+    } else {
+      var maxValidShort = price * (1 + prof.maxEntryDist);
+      var sCandidates = [a1h.ema7, a15.ema25, a5.ema99, a5.ema7, a1h.ema99].filter(function(v) {
+        return v <= maxValidShort && v >= price * 0.9995;
+      });
+      if (sCandidates.length > 0) {
+        entryPrice = sCandidates.reduce(function(s, v) { return s + v; }, 0) / sCandidates.length;
+      } else {
+        entryPrice = price * (1 + prof.maxEntryDist * 0.55);
+      }
+    }
+
+    // 3. SL MUAK ULTIMATE (LOCAL 36-CANDLE SWING + ANTI-WICK BUFFER)
+    var slPrice, swingAnchor, expiryPrice;
+    if (isLong) {
+      swingAnchor = Math.min(a5.localLow36, a15.localLow36);
+      var minSl = entryPrice * (1 - prof.slPct * 1.35);
+      var maxSl = entryPrice * (1 - prof.slPct * 0.85);
+      var rawSl = Math.min(entryPrice * (1 - prof.slPct), swingAnchor * (1 - prof.slPct * 0.25));
+      slPrice = Math.max(minSl, Math.min(maxSl, rawSl));
+      expiryPrice = Math.min(swingAnchor, slPrice * 1.001);
+    } else {
+      swingAnchor = Math.max(a5.localHigh36, a15.localHigh36);
+      var minSlS = entryPrice * (1 + prof.slPct * 0.85);
+      var maxSlS = entryPrice * (1 + prof.slPct * 1.35);
+      var rawSlS = Math.max(entryPrice * (1 + prof.slPct), swingAnchor * (1 + prof.slPct * 0.25));
+      slPrice = Math.min(maxSlS, Math.max(minSlS, rawSlS));
+      expiryPrice = Math.max(swingAnchor, slPrice * 0.999);
+    }
+
+    // 4. TP1 (GESER BEP) & TP FINAL REALISTIS (DIBATASI 24H HIGH/LOW & LOKAL 54 CANDLE)
+    var riskPts = Math.abs(entryPrice - slPrice);
+    var tp1Price, tpFinalPrice;
+    if (isLong) {
+      var ceil24 = h24 > entryPrice ? h24 : entryPrice * (1 + prof.tp2Cap);
+      var localPeak = Math.max(a5.localHigh36, a15.localHigh36);
+      var rawTp1 = localPeak > entryPrice * 1.002 ? localPeak : entryPrice + riskPts * 0.95;
+      tp1Price = Math.min(rawTp1, entryPrice * (1 + prof.tp1Cap));
+      if (tp1Price <= entryPrice * 1.0015) tp1Price = entryPrice + riskPts * 0.85;
+
+      var rawTp2 = Math.min(ceil24, Math.max(a5.localHigh54, a15.localHigh54, entryPrice + riskPts * 1.75));
+      tpFinalPrice = Math.min(rawTp2, entryPrice * (1 + prof.tp2Cap));
+      if (tpFinalPrice <= tp1Price * 1.0015) {
+        tpFinalPrice = Math.min(ceil24, tp1Price + riskPts * 0.85);
+        if (tpFinalPrice <= tp1Price) tpFinalPrice = tp1Price + riskPts * 0.80;
+      }
+    } else {
+      var floor24 = (l24 > 0 && l24 < entryPrice) ? l24 : entryPrice * (1 - prof.tp2Cap);
+      var localBottom = Math.min(a5.localLow36, a15.localLow36);
+      var rawTp1S = localBottom < entryPrice * 0.998 ? localBottom : entryPrice - riskPts * 0.95;
+      tp1Price = Math.max(rawTp1S, entryPrice * (1 - prof.tp1Cap));
+      if (tp1Price >= entryPrice * 0.9985) tp1Price = entryPrice - riskPts * 0.85;
+
+      var rawTp2S = Math.max(floor24, Math.min(a5.localLow54, a15.localLow54, entryPrice - riskPts * 1.75));
+      tpFinalPrice = Math.max(rawTp2S, entryPrice * (1 - prof.tp2Cap));
+      if (tpFinalPrice >= tp1Price * 0.9985) {
+        tpFinalPrice = Math.max(floor24, tp1Price - riskPts * 0.85);
+        if (tpFinalPrice >= tp1Price) tpFinalPrice = tp1Price - riskPts * 0.80;
+      }
+    }
+
+    var rrRatio = riskPts > 0 ? (Math.abs(tpFinalPrice - entryPrice) / riskPts).toFixed(2) : "1.65";
+
+    app.overlayLines = [
+      { label: "ENTRY " + bias, price: entryPrice, color: "#1d4ed8", dash: [] },
+      { label: "SL MUAK", price: slPrice, color: "#dc2626", dash: [5, 4] },
+      { label: "TP1 (BEP)", price: tp1Price, color: "#059669", dash: [4, 4] },
+      { label: "TP FINAL", price: tpFinalPrice, color: "#047857", dash: [] },
+      { label: "EXPIRY", price: expiryPrice, color: "#d97706", dash: [2, 3] }
+    ];
+    renderAllCharts();
+
+    app.muakExpiryMs = Date.now() + 90 * 60 * 1000;
+    app.lastMuak = {
+      sym: sym, bias: bias, confidence: confidence,
+      entryPrice: entryPrice, slPrice: slPrice, tp1Price: tp1Price,
+      tpFinalPrice: tpFinalPrice, expiryPrice: expiryPrice, rrRatio: rrRatio,
+      prof: prof, a5: a5, a15: a15, a30: a30, a1h: a1h,
+      h24: h24, l24: l24, price: price
+    };
+
+    renderMuakPanel(app.lastMuak);
+  }
+
+  function renderMuakPanel(sig) {
+    var panel = document.getElementById("signalOutputPanel");
+    if (!panel) return;
+    panel.classList.remove("hidden", "border-green", "border-amber", "border-red");
+
+    var tier = sig.confidence >= 80 ? "green" : (sig.confidence >= 60 ? "amber" : "red");
+    var tierLbl = sig.confidence >= 80 ? "SANGAT KUAT" : (sig.confidence >= 60 ? "SELEKTIF" : "ZONA KETAT");
+    panel.classList.add("border-" + tier);
+
+    var isLong = sig.bias === "LONG";
+    var biasDesc = isLong
+      ? "LONG 🟢 (172-Candle Breakout Above EMA99 1H & Pullback Cluster EMA7 1H / EMA25 15M / EMA99 5M)"
+      : "SHORT 🔴 (172-Candle Breakdown Below EMA99 1H & Retest Cluster EMA7 1H / EMA25 15M / EMA99 5M)";
+
+    panel.innerHTML = [
+      '<div class="sig-head">',
+      '  <div>',
+      '    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">',
+      '      <span class="sig-title">🧠 MASTER CALL MUAK ULTIMATE – ' + sig.sym + '</span>',
+      '      <span class="conf-badge ' + tier + ' mono">🎯 KEYAKINAN SINYAL: ' + sig.confidence + '% • ' + tierLbl + '</span>',
+      '    </div>',
+      '    <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">Mode: <strong>ONE ENTRY (172-Candle Engine)</strong> • <span id="muakLiveCountdown" class="mono" style="color:var(--amber);font-weight:800;">⏱ Valid 90:00</span> • Auto-Profile SL (' + sig.prof.tag + ') • TF: 5M – 15M – 30M – 1H</div>',
+      '  </div>',
+      '  <div class="flex-row">',
+      '    <button class="btn btn-dark" onclick="copyMuakText()">📋 Salin Sinyal MUAK</button>',
+      '    <button class="btn" onclick="hideSignalPanel()">✕ Tutup</button>',
+      '  </div>',
+      '</div>',
+      '<div class="muak-cols">',
+      '  <div class="muak-panel ' + (isLong ? "long" : "short") + '">',
+      '    <h4>BIAS &amp; ALASAN STRUKTURAL (172 CANDLE)</h4>',
+      '    <div style="font-weight:800;margin-bottom:6px;color:' + (isLong ? "var(--green)" : "var(--red)") + ';">' + biasDesc + '</div>',
+      '    <ul>',
+      '      <li><strong>EMA99 1H (' + fmtP(sig.a1h.ema99) + ') &amp; 24H Range:</strong> Harga live <span class="mono">' + fmtP(sig.price) + '</span> ' + (isLong ? "bertahan di atas" : "tertahan di bawah") + ' EMA99 1H (H24: ' + fmtP(sig.h24) + ' | L24: ' + fmtP(sig.l24) + ').</li>',
+      '      <li><strong>Cluster Magnet Entry:</strong> 1H E7 (<span class="mono">' + fmtP(sig.a1h.ema7) + '</span>) • 15M E25 (<span class="mono">' + fmtP(sig.a15.ema25) + '</span>) • 5M E99 (<span class="mono">' + fmtP(sig.a5.ema99) + '</span>) | RSI(6) 5M: <span class="mono">' + sig.a5.rsi6.toFixed(1) + '</span>.</li>',
+      '      <li><strong>OBV &amp; HTF Volume:</strong> OBV 5M (' + (sig.a5.obv.bullish ? "Akumulasi > EMA10" : "Distribusi < EMA10") + ') &amp; 1H (' + (sig.a1h.obv.bullish ? "Akumulasi > EMA10" : "Distribusi < EMA10") + ') | Vol 1H: <span class="mono">' + fmtK(sig.a1h.volCur) + '</span> vs MA5 <span class="mono">' + fmtK(sig.a1h.volMa5) + '</span>.</li>',
+      '    </ul>',
+      '  </div>',
+      '  <div class="muak-panel">',
+      '    <h4>ONE ENTRY &amp; SL AUTO-PROFILE MUAK (' + sig.prof.label + ')</h4>',
+      '    <ul>',
+      '      <li><strong>📌 ONE ENTRY (' + sig.bias + '): <span class="mono" style="color:var(--primary);font-size:13px;">' + fmtP(sig.entryPrice) + '</span></strong> — Pullback presisi pada cluster EMA7 1H / EMA25 15M / EMA99 5M (mudah tersentuh).</li>',
+      '      <li><strong>📌 SL MUAK Ultimate: <span class="mono" style="color:var(--red);font-size:13px;">' + fmtP(sig.slPrice) + '</span></strong> — Aman di ' + (isLong ? "bawah" : "atas") + ' swing lokal 36-candle (<span class="mono">' + fmtP(isLong ? sig.a5.localLow36 : sig.a5.localHigh36) + '</span>) + buffer ' + sig.prof.label + '.</li>',
+      '      <li><strong>📌 TP1: <span class="mono" style="color:var(--green);">' + fmtP(sig.tp1Price) + '</span></strong> (Ambil TP1 &amp; <strong>wajib geser SL ke BEP / SL+</strong> saat tersentuh).</li>',
+      '      <li><strong>📌 TP FINAL: <span class="mono" style="color:var(--green);">' + fmtP(sig.tpFinalPrice) + '</span></strong> (Target lokal dibatasi 24H High/Low • <strong>R:R ≈ 1 : ' + sig.rrRatio + '</strong>).</li>',
+      '    </ul>',
+      '  </div>',
+      '  <div class="muak-panel">',
+      '    <h4>VALIDASI MUAK &amp; MOMENTUM EXPIRY</h4>',
+      '    <ul>',
+      '      <li>✔ <strong>172-Candle Visual Calibration</strong> → Jendela struktur &amp; jarak target disamakan persis dengan chart layar HP.</li>',
+      '      <li>✔ <strong>LTF EMA7/25/99 Confluence</strong> → Zona entry realistis tanpa menunggu koreksi ekstrem 24 jam.</li>',
+      '      <li>✔ <strong>OBV &amp; Momentum Check</strong> → Arus OBV terhadap EMA10 &amp; Volume tervalidasi.</li>',
+      '      <li style="color:#b45309;font-weight:800;">⏳ <strong>MOMENTUM EXPIRY:</strong> Jika dalam 4 candle 5M close bertahan di ' + (isLong ? "bawah" : "atas") + ' <span class="mono">' + fmtP(sig.expiryPrice) + '</span>, sinyal hangus (cancel bias).</li>',
+      '    </ul>',
+      '  </div>',
+      '</div>',
+      '<div class="final-bar">',
+      '  <div>',
+      '    <div style="font-size:10px;color:#93c5fd;font-weight:800;">🚀 FINAL SIGNAL — ' + sig.sym + ' (MUAK ULTIMATE • KEYAKINAN ' + sig.confidence + '%)</div>',
+      '    <div class="flex-row mono" style="margin-top:5px;">',
+      '      <span class="lvl-tag" style="color:' + (isLong ? "#34d399" : "#f87171") + ';font-weight:800;">' + sig.bias + ' ' + fmtP(sig.entryPrice) + '</span>',
+      '      <span class="lvl-tag">SL: <strong>' + fmtP(sig.slPrice) + '</strong></span>',
+      '      <span class="lvl-tag">TP1: <strong style="color:#34d399;">' + fmtP(sig.tp1Price) + '</strong></span>',
+      '      <span class="lvl-tag">TP FINAL: <strong style="color:#34d399;">' + fmtP(sig.tpFinalPrice) + '</strong></span>',
+      '    </div>',
+      '  </div>',
+      '  <button class="btn btn-amber" onclick="loadSignalToCekkan()">📊 Evaluasi Posisi Ini</button>',
+      '</div>'
+    ].join("");
+  }
+
+  window.hideSignalPanel = function() {
+    var panel = document.getElementById("signalOutputPanel");
+    if (panel) panel.classList.add("hidden");
+  };
+
+  window.handleGaskanClick = function() {
+    if (app.mode === "updown") executeUpDownAnalysis();
+    else executeFuturesMuakUltimate();
+  };
+
+  window.copyMuakText = function() {
+    var s = app.lastMuak;
+    if (!s) return;
+    var msg = [
+      "🧠 MASTER CALL MUAK ULTIMATE – " + s.sym,
+      "Keyakinan: " + s.confidence + "% | Mode: ONE ENTRY | ⏱ Valid 90 menit",
+      "BIAS: " + s.bias,
+      s.bias + " " + fmtP(s.entryPrice),
+      "SL " + fmtP(s.slPrice),
+      "TP1 " + fmtP(s.tp1Price) + " (Geser SL ke BEP)",
+      "TP FINAL " + fmtP(s.tpFinalPrice) + " (R:R 1:" + s.rrRatio + ")",
+      "Momentum Expiry: Close 4x 5M " + (s.bias === "LONG" ? "< " : "> ") + fmtP(s.expiryPrice)
+    ].join("\n");
+    copyTextSafe(msg, "Sinyal MUAK ULTIMATE disalin!");
+  };
+
+  // =========================================================================
+  // 6. HIGH-DPI CANVAS CHARTS & 4-BOX MULTI-FACTOR FOOTER (GRID 2x2 UTUH)
+  // =========================================================================
+  function renderAllCharts() {
+    var matrix = document.getElementById("chartsMatrix");
+    if (!matrix) return;
+
+    var cards = [];
+    if (app.mode === "futures") {
+      matrix.classList.remove("cols-3");
+      var s = app.futCoin;
+      cards = [
+        { sym: s, tf: "5m", title: "5 Menit" },
+        { sym: s, tf: "15m", title: "15 Menit" },
+        { sym: s, tf: "30m", title: "30 Menit" },
+        { sym: s, tf: "1h", title: "1 Jam" }
+      ];
+    } else {
+      if (app.udView === "per_time") {
+        matrix.classList.add("cols-3");
+        var dur = app.udDur;
+        cards = CORE_3.map(function(c) {
+          return { sym: c, tf: dur, title: "Sesi " + dur.toUpperCase() };
+        });
+      } else {
+        matrix.classList.remove("cols-3");
+        var uc = app.udCoin;
+        cards = [
+          { sym: uc, tf: "5m", title: "Opsi 5 Menit" },
+          { sym: uc, tf: "15m", title: "Opsi 15 Menit" },
+          { sym: uc, tf: "1h", title: "Opsi 1 Jam" },
+          { sym: uc, tf: "1d", title: "Opsi 1 Hari" }
+        ];
+      }
+    }
+
+    matrix.innerHTML = cards.map(function(item, idx) {
+      var arr = app.klines[item.sym + "_" + item.tf] || [];
+      var st = analyzeCandles(arr);
+      var ft = st.footer;
+      var icon = ft.regime === "BULLISH" ? "▲" : (ft.regime === "BEARISH" ? "▼" : "◆");
+
+      return [
+        '<div class="chart-box">',
+        '  <div class="chart-header">',
+        '    <div style="display:flex;align-items:center;gap:6px;">',
+        '      <span class="tf-pill mono">' + item.sym.replace("USDT", "") + '</span>',
+        '      <strong>' + item.title + '</strong>',
+        '    </div>',
+        '    <div class="ind-strip mono">',
+        '      <span style="color:#d97706;">E7:' + fmtP(st.ema7) + '</span>',
+        '      <span style="color:#2563eb;">E25:' + fmtP(st.ema25) + '</span>',
+        '      <span style="color:#7c3aed;">E99:' + fmtP(st.ema99) + '</span>',
+        '      <span style="color:#475569;">ADX:' + st.adx14.toFixed(0) + '</span>',
+        '      <span style="color:#0f172a;">RSI6:' + st.rsi6.toFixed(1) + '</span>',
+        '    </div>',
+        '  </div>',
+        '  <div class="canvas-holder">',
+        '    <canvas id="cvChart_' + idx + '" class="kline-cv"></canvas>',
+        '  </div>',
+        '  <div class="analysis-footer">',
+        '    <div class="analysis-bar">',
+        '      <span class="regime-badge ' + ft.cls + '">' + icon + ' ' + ft.regime + ' (' + item.title + ')</span>',
+        '      <span class="score-tag mono">Konfluensi 5-Faktor: ' + ft.bullPts + ' Bull / ' + ft.bearPts + ' Bear</span>',
+        '    </div>',
+        '    <div class="factors-2x2 mono">',
+        '      <div class="f-card">',
+        '        <div class="f-title">1. Struktur EMA (7 / 25 / 99)</div>',
+        '        <div class="f-body">' + ft.emaTxt + '</div>',
+        '      </div>',
+        '      <div class="f-card">',
+        '        <div class="f-title">2. Arus Modal OBV vs EMA(10)</div>',
+        '        <div class="f-body" style="color:' + (st.obv.bullish ? "var(--green)" : "var(--red)") + ';">' + ft.obvTxt + '</div>',
+        '      </div>',
+        '      <div class="f-card">',
+        '        <div class="f-title">3. Momentum RSI(6) &amp; ADX(14)</div>',
+        '        <div class="f-body">' + ft.momTxt + '</div>',
+        '      </div>',
+        '      <div class="f-card">',
+        '        <div class="f-title">4. Volume vs MA(5) &amp; Skor</div>',
+        '        <div class="f-body">' + ft.volTxt + '</div>',
+        '      </div>',
+        '    </div>',
+        '  </div>',
+        '</div>'
+      ].join("");
+    }).join("");
+
+    cards.forEach(function(item, idx) {
+      var cv = document.getElementById("cvChart_" + idx);
+      var arr = app.klines[item.sym + "_" + item.tf] || [];
+      var lines = [];
+      if (app.mode === "futures") {
+        lines = app.overlayLines;
+      } else if (arr.length > 0) {
+        var openSesi = arr[arr.length - 1].open;
+        lines = [{ label: "OPEN SESI", price: openSesi, color: "#0284c7", dash: [4, 3] }];
+      }
+      paintCanvas(cv, arr, lines, item.tf);
+    });
+  }
+
+  function fmtWibAxis(ms, tf) {
+    var d = new Date(ms + 7 * 3600000);
+    var hh = String(d.getUTCHours()).padStart(2, "0");
+    var mm = String(d.getUTCMinutes()).padStart(2, "0");
+    if (tf === "1d") {
+      return String(d.getUTCDate()).padStart(2, "0") + "/" + String(d.getUTCMonth() + 1).padStart(2, "0");
+    }
+    return hh + ":" + mm;
+  }
+
+  function paintCanvas(canvas, candles, lines, tf) {
+    if (!canvas) return;
+    var box = canvas.parentElement.getBoundingClientRect();
+    var dpr = Math.max(window.devicePixelRatio || 1, 2);
+    var w = Math.max(250, Math.floor(box.width));
+    var h = Math.max(200, Math.floor(box.height));
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+
+    var ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    if (!candles || candles.length < 5) {
+      ctx.fillStyle = "#64748b";
+      ctx.font = "12px sans-serif";
+      ctx.fillText("Memuat candlestick real-time...", 16, h / 2);
+      return;
+    }
+
+    var vis = candles.slice(-72);
+    var st = analyzeCandles(candles);
+    var e7 = st.ema7Arr.slice(-vis.length);
+    var e25 = st.ema25Arr.slice(-vis.length);
+    var e99 = st.ema99Arr.slice(-vis.length);
+
+    var minP = Infinity, maxP = -Infinity, maxV = 0;
+    vis.forEach(function(c, i) {
+      minP = Math.min(minP, c.low, e7[i] || c.low, e25[i] || c.low, e99[i] || c.low);
+      maxP = Math.max(maxP, c.high, e7[i] || c.high, e25[i] || c.high, e99[i] || c.high);
+      if (c.volume > maxV) maxV = c.volume;
+    });
+
+    if (Array.isArray(lines)) {
+      lines.forEach(function(l) {
+        var cur = vis[vis.length - 1].close;
+        if (l.price && Math.abs(l.price - cur) / cur < 0.08) {
+          minP = Math.min(minP, l.price);
+          maxP = Math.max(maxP, l.price);
+        }
+      });
+    }
+
+    var pTop = 12, pBot = 40, pLeft = 8, pRight = 70;
+    var plotW = w - pLeft - pRight;
+    var plotH = h - pTop - pBot;
+    var diff = (maxP - minP) || 1;
+    minP -= diff * 0.04;
+    maxP += diff * 0.04;
+    var span = maxP - minP;
+
+    var toY = function(price) { return pTop + ((maxP - price) / span) * plotH; };
+    var stepX = plotW / vis.length;
+
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = 1;
+    ctx.fillStyle = "#64748b";
+    ctx.font = "10px ui-monospace, monospace";
+    for (var g = 0; g <= 4; g++) {
+      var val = maxP - (span * g) / 4;
+      var y = Math.round(toY(val)) + 0.5;
+      ctx.save();
+      ctx.setLineDash([2, 3]);
+      ctx.beginPath();
+      ctx.moveTo(pLeft, y);
+      ctx.lineTo(w - pRight, y);
+      ctx.stroke();
+      ctx.restore();
+      ctx.fillText(fmtP(val), w - pRight + 5, y + 3);
+    }
+
+    var tStep = Math.max(1, Math.floor(vis.length / 4));
+    for (var t = 0; t < vis.length; t += tStep) {
+      var tx = pLeft + t * stepX + stepX / 2;
+      ctx.fillText(fmtWibAxis(vis[t].time, tf), Math.max(pLeft, tx - 14), h - 4);
+    }
+
+    var vMaxH = 20;
+    vis.forEach(function(c, i) {
+      var vx = pLeft + i * stepX;
+      var vh = maxV > 0 ? (c.volume / maxV) * vMaxH : 0;
+      ctx.fillStyle = c.close >= c.open ? "rgba(22, 163, 74, 0.24)" : "rgba(220, 38, 38, 0.24)";
+      ctx.fillRect(vx + 1, h - 17 - vh, Math.max(1.5, stepX - 2), vh);
+    });
+
+    vis.forEach(function(c, i) {
+      var xc = Math.round(pLeft + i * stepX + stepX / 2) + 0.5;
+      var up = c.close >= c.open;
+      ctx.strokeStyle = up ? "#059669" : "#dc2626";
+      ctx.fillStyle = up ? "#16a34a" : "#ef4444";
+      ctx.lineWidth = 1.2;
+
+      ctx.beginPath();
+      ctx.moveTo(xc, toY(c.high));
+      ctx.lineTo(xc, toY(c.low));
+      ctx.stroke();
+
+      var yo = toY(c.open);
+      var yc = toY(c.close);
+      var bTop = Math.min(yo, yc);
+      var bH = Math.max(1.8, Math.abs(yc - yo));
+      var bW = Math.max(2.0, stepX * 0.62);
+      ctx.fillRect(xc - bW / 2, bTop, bW, bH);
+    });
+
+    var drawCurve = function(arr, col) {
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1.5;
+      ctx.lineJoin = "round";
+      ctx.beginPath();
+      arr.forEach(function(v, i) {
+        var lx = pLeft + i * stepX + stepX / 2;
+        var ly = toY(v);
+        if (i === 0) ctx.moveTo(lx, ly); else ctx.lineTo(lx, ly);
+      });
+      ctx.stroke();
+    };
+    drawCurve(e99, "#7c3aed");
+    drawCurve(e25, "#2563eb");
+    drawCurve(e7, "#d97706");
+
+    if (Array.isArray(lines)) {
+      lines.forEach(function(ln) {
+        if (!ln.price || ln.price < minP || ln.price > maxP) return;
+        var ly = Math.round(toY(ln.price)) + 0.5;
+        ctx.save();
+        ctx.strokeStyle = ln.color || "#1d4ed8";
+        ctx.lineWidth = 1.3;
+        if (ln.dash && ln.dash.length) ctx.setLineDash(ln.dash);
+        ctx.beginPath();
+        ctx.moveTo(pLeft, ly);
+        ctx.lineTo(w - pRight, ly);
+        ctx.stroke();
+
+        ctx.fillStyle = ln.color || "#1d4ed8";
+        ctx.font = "bold 8px ui-monospace, monospace";
+        ctx.fillText(ln.label, pLeft + 4, ly - 3);
+        ctx.restore();
+      });
+    }
+
+    var lastP = vis[vis.length - 1].close;
+    var yNow = Math.round(toY(lastP)) + 0.5;
+    ctx.save();
+    ctx.strokeStyle = "#dc2626";
+    ctx.setLineDash([2, 2]);
+    ctx.beginPath();
+    ctx.moveTo(pLeft, yNow);
+    ctx.lineTo(w - pRight, yNow);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle = "#dc2626";
+    ctx.fillRect(w - pRight + 2, yNow - 8, pRight - 4, 16);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 9px ui-monospace, monospace";
+    ctx.fillText(fmtP(lastP), w - pRight + 5, yNow + 3);
+  }
+
+  // =========================================================================
+  // 7. WIB CLOCK & SESSION COUNTDOWN
+  // =========================================================================
+  function getWibDate() {
+    var now = new Date();
+    var utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    return new Date(utc + 7 * 3600000);
+  }
+
+  function tickClock() {
+    var wib = getWibDate();
+    var hh = String(wib.getHours()).padStart(2, "0");
+    var mm = String(wib.getMinutes()).padStart(2, "0");
+    var ss = String(wib.getSeconds()).padStart(2, "0");
+    var el = document.getElementById("hdrClock");
+    if (el) el.textContent = hh + ":" + mm + ":" + ss + " WIB";
+
+    if (app.muakExpiryMs > 0) {
+      var rem = Math.max(0, app.muakExpiryMs - Date.now());
+      var m = Math.floor(rem / 60000);
+      var s = Math.floor((rem % 60000) / 1000);
+      var mEl = document.getElementById("muakLiveCountdown");
+      if (mEl) {
+        mEl.textContent = rem > 0
+          ? "⏱ Valid " + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0")
+          : "⛔ EXPIRED";
+      }
+    }
+
+    if (app.mode === "updown") updateUpDownBanner();
+  }
+
+  function updateUpDownBanner() {
+    var wib = getWibDate();
+    var min = wib.getMinutes();
+    var sec = wib.getSeconds();
+    var hr = wib.getHours();
+
+    var remSec = 0;
+    var idealTxt = "";
+    var zoneTxt = "🟢 ZONA IDEAL";
+
+    if (app.udDur === "5m") {
+      var mod5 = min % 5;
+      remSec = (4 - mod5) * 60 + (60 - sec);
+      idealTxt = "Klik Ideal 5m: Menit ke-1 s/d ke-2 sesi (Sisa 3-4 mnt)";
+      zoneTxt = mod5 <= 1 ? "🟢 ZONA IDEAL" : (mod5 === 2 ? "🟡 ZONA KETAT" : "🔴 SISA MEPET");
+    } else if (app.udDur === "15m") {
+      var mod15 = min % 15;
+      remSec = (14 - mod15) * 60 + (60 - sec);
+      idealTxt = "Klik Ideal 15m: Menit ke-2 s/d ke-5 sesi (Sisa 10-13 mnt)";
+      zoneTxt = mod15 <= 5 ? "🟢 ZONA IDEAL" : (mod15 <= 9 ? "🟡 ZONA KETAT" : "🔴 SISA MEPET");
+    } else if (app.udDur === "1h") {
+      remSec = (59 - min) * 60 + (60 - sec);
+      idealTxt = "Klik Ideal 1H: Menit :05 s/d :20 tiap jam";
+      zoneTxt = min <= 20 ? "🟢 ZONA IDEAL" : (min <= 40 ? "🟡 ZONA KETAT" : "🔴 SISA MEPET");
+    } else {
+      var tgt = new Date(wib);
+      tgt.setHours(23, 0, 0, 0);
+      if (hr >= 23) tgt.setDate(tgt.getDate() + 1);
+      remSec = Math.max(0, Math.floor((tgt - wib) / 1000));
+      idealTxt = "Klik Ideal 1D: Pukul 07:00 - 14:00 WIB (Reset 23:00 WIB)";
+      zoneTxt = (hr >= 7 && hr <= 15) ? "🟢 ZONA IDEAL" : "🟡 PANTAU TREN HARIAN";
+    }
+
+    var cdEl = document.getElementById("udCountdown");
+    if (cdEl) {
+      var hP = Math.floor(remSec / 3600);
+      var mP = Math.floor((remSec % 3600) / 60);
+      var sP = remSec % 60;
+      cdEl.textContent = hP > 0
+        ? String(hP).padStart(2, "0") + ":" + String(mP).padStart(2, "0") + ":" + String(sP).padStart(2, "0")
+        : String(mP).padStart(2, "0") + ":" + String(sP).padStart(2, "0");
+    }
+
+    var iwEl = document.getElementById("idealWindowTxt");
+    if (iwEl) iwEl.textContent = idealTxt;
+
+    var zEl = document.getElementById("udSafetyZone");
+    if (zEl) zEl.textContent = zoneTxt;
+
+    var headEl = document.getElementById("udStripHeading");
+    if (headEl) {
+      headEl.textContent = app.udView === "per_time"
+        ? "3 KOIN SERENTAK (BTC • ETH • BNB) • SESI " + app.udDur.toUpperCase() + " (PURE MOMENTUM FOLLOWER)"
+        : app.udCoin + " • PANTAUAN 4 DURASI (5M • 15M • 1H • 1D)";
+    }
+
+    var rowEl = document.getElementById("udOpensRow");
+    if (rowEl) {
+      var tf = app.udDur;
+      rowEl.innerHTML = CORE_3.map(function(sym) {
+        var arr = app.klines[sym + "_" + tf] || [];
+        var op = arr.length > 0 ? arr[arr.length - 1].open : ((app.prices[sym] && app.prices[sym].price) || 0);
+        return "<span>Open " + sym.replace("USDT", "") + ": <strong>" + fmtP(op) + "</strong></span>";
+      }).join("");
+    }
+  }
+
+  // =========================================================================
+  // 8. UI CONTROLS, WATCHLIST, MODALS & CLIPBOARD
+  // =========================================================================
+  function renderCoinChips() {
+    var box = document.getElementById("coinChipsList");
+    if (!box) return;
+    var list = app.mode === "futures" ? app.watchlist : CORE_3;
+    var active = app.mode === "futures" ? app.futCoin : app.udCoin;
+
+    box.innerHTML = list.map(function(sym) {
+      var isAct = sym === active;
+      var levTag = app.mode === "futures" ? '<span class="lev-pill mono">' + getLev(sym) + 'x</span>' : '';
+      var delTag = (app.mode === "futures" && app.watchlist.length > 1)
+        ? '<span class="del-coin" onclick="event.stopPropagation();removeCoin(\'' + sym + '\')">×</span>'
+        : '';
+      return '<button class="chip-btn ' + (isAct ? "active" : "") + '" onclick="pickCoin(\'' + sym + '\')">' + sym + levTag + delTag + '</button>';
+    }).join("");
+
+    var levBadge = document.getElementById("levInfoBadge");
+    if (levBadge) levBadge.textContent = "Max Leverage " + app.futCoin + ": " + getLev(app.futCoin) + "x";
+  }
+
+  window.switchMode = function(mode) {
+    app.mode = mode;
+    document.getElementById("tabUpDown").classList.toggle("active", mode === "updown");
+    document.getElementById("tabFutures").classList.toggle("active", mode === "futures");
+
+    document.getElementById("udControlsBar").classList.toggle("hidden", mode !== "updown");
+    document.getElementById("udSessionStrip").classList.toggle("hidden", mode !== "updown");
+    document.getElementById("idealWindowPill").classList.toggle("hidden", mode !== "updown");
+
+    var showCoins = mode === "futures" || (mode === "updown" && app.udView === "per_coin");
+    document.getElementById("coinSelectorBar").classList.toggle("hidden", !showCoins);
+    document.getElementById("addCoinGroup").classList.toggle("hidden", mode !== "futures");
+    document.getElementById("btnCekkan").classList.toggle("hidden", mode !== "futures");
+    document.getElementById("levInfoBadge").classList.toggle("hidden", mode !== "futures");
+
+    var gb = document.getElementById("gaskanBadge");
+    if (gb) gb.textContent = mode === "futures" ? "MUAK ULTIMATE" : (app.udView === "per_time" ? "3 KOIN SEARAH" : "4 DURASI");
+
+    window.hideSignalPanel();
+    renderCoinChips();
+    updateTopTicker();
+    refreshAllVisibleKlines();
+  };
+
+  window.selectUdDur = function(dur) {
+    app.udDur = dur;
+    document.querySelectorAll("#udDurGroup .chip-btn").forEach(function(b) {
+      b.classList.toggle("active", b.getAttribute("data-dur") === dur);
+    });
+    updateUpDownBanner();
+    refreshAllVisibleKlines();
+  };
+
+  window.selectUdView = function(view) {
+    app.udView = view;
+    document.getElementById("btnUdPerTime").classList.toggle("active", view === "per_time");
+    document.getElementById("btnUdPerCoin").classList.toggle("active", view === "per_coin");
+    document.getElementById("coinSelectorBar").classList.toggle("hidden", view === "per_time");
+    document.getElementById("addCoinGroup").classList.add("hidden");
+
+    var gb = document.getElementById("gaskanBadge");
+    if (gb) gb.textContent = view === "per_time" ? "3 KOIN SEARAH" : "4 DURASI";
+
+    renderCoinChips();
+    refreshAllVisibleKlines();
+  };
+
+  window.pickCoin = function(sym) {
+    if (app.mode === "futures") app.futCoin = sym;
+    else app.udCoin = sym;
+    app.overlayLines = [];
+    renderCoinChips();
+    updateTopTicker();
+    syncPrices1s();
+    refreshAllVisibleKlines();
+  };
+
+  window.addCoinToWatchlist = function() {
+    var inp = document.getElementById("customCoinInput");
+    if (!inp) return;
+    var val = inp.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (!val) return;
+    if (val.slice(-4) !== "USDT") val += "USDT";
+    if (app.watchlist.indexOf(val) === -1) {
+      app.watchlist.push(val);
+      writeStore("hc24_watchlist", app.watchlist);
+    }
+    inp.value = "";
+    window.pickCoin(val);
+    toast(val + " ditambahkan ke Watchlist!");
+  };
+
+  window.removeCoin = function(sym) {
+    if (app.watchlist.length <= 1) return;
+    app.watchlist = app.watchlist.filter(function(c) { return c !== sym; });
+    writeStore("hc24_watchlist", app.watchlist);
+    if (app.futCoin === sym) app.futCoin = app.watchlist[0];
+    renderCoinChips();
+    refreshAllVisibleKlines();
+  };
+
+  window.clearOverlayLines = function() {
+    app.overlayLines = [];
+    renderAllCharts();
+    toast("Garis overlay pada chart dibersihkan.");
+  };
+
+  function copyTextSafe(text, okMsg) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand("copy");
+      toast(okMsg);
+    } catch (e) {
+      toast("Gagal menyalin.");
+    }
+    document.body.removeChild(ta);
+  }
+
+  window.copyLiveSnapshot = function() {
+    var sym = app.mode === "futures" ? app.futCoin : app.udCoin;
+    var price = (app.prices[sym] && app.prices[sym].price) || 0;
+    var c5 = analyzeCandles(app.klines[sym + "_5m"] || []);
+    var c15 = analyzeCandles(app.klines[sym + "_15m"] || []);
+    var c1h = analyzeCandles(app.klines[sym + "_1h"] || []);
+    var txt = [
+      "📊 HARCRIPT v2.4 SNAPSHOT (172-CANDLE) — " + sym,
+      "Harga Live: " + fmtP(price),
+      "5M: Close " + fmtP(c5.close) + " | E7 " + fmtP(c5.ema7) + " | E25 " + fmtP(c5.ema25) + " | E99 " + fmtP(c5.ema99) + " | RSI6 " + c5.rsi6.toFixed(1),
+      "15M: Close " + fmtP(c15.close) + " | E7 " + fmtP(c15.ema7) + " | E25 " + fmtP(c15.ema25) + " | ADX " + c15.adx14.toFixed(1),
+      "1H: Close " + fmtP(c1h.close) + " | E7 " + fmtP(c1h.ema7) + " | E99 " + fmtP(c1h.ema99)
+    ].join("\n");
+    copyTextSafe(txt, "Data live multi-TF disalin!");
+  };
+
+  window.openCekkanModal = function() {
+    var sym = app.futCoin;
+    var price = (app.prices[sym] && app.prices[sym].price) || 0;
+    document.getElementById("cLev").value = getLev(sym);
+    if (!document.getElementById("cEntry").value && price) {
+      document.getElementById("cEntry").value = price;
+      document.getElementById("cTp").value = (price * 1.012).toFixed(2);
+      document.getElementById("cSl").value = (price * 0.992).toFixed(2);
+    }
+    window.computePnL();
+    document.getElementById("cekkanModal").classList.add("open");
+  };
+
+  window.loadSignalToCekkan = function() {
+    var s = app.lastMuak;
+    if (!s) return;
+    document.getElementById("cSide").value = s.bias;
+    document.getElementById("cLev").value = getLev(s.sym);
+    document.getElementById("cEntry").value = s.entryPrice.toFixed(4);
+    document.getElementById("cTp").value = s.tpFinalPrice.toFixed(4);
+    document.getElementById("cSl").value = s.slPrice.toFixed(4);
+    window.computePnL();
+    document.getElementById("cekkanModal").classList.add("open");
+  };
+
+  window.computePnL = function() {
+    var sym = app.futCoin;
+    var liveP = (app.prices[sym] && app.prices[sym].price) || 0;
+    var side = document.getElementById("cSide").value;
+    var margin = parseFloat(document.getElementById("cMargin").value) || 0;
+    var lev = parseFloat(document.getElementById("cLev").value) || 1;
+    var entry = parseFloat(document.getElementById("cEntry").value) || 0;
+    var tp = parseFloat(document.getElementById("cTp").value) || 0;
+    var sl = parseFloat(document.getElementById("cSl").value) || 0;
+    var out = document.getElementById("cResultBox");
+    if (!out || !entry) return;
+
+    var notional = margin * lev;
+    var move = side === "LONG" ? (liveP - entry) / entry : (entry - liveP) / entry;
+    var pnlNow = notional * move;
+    var tpMove = side === "LONG" ? (tp - entry) / entry : (entry - tp) / entry;
+    var slMove = side === "LONG" ? (entry - sl) / entry : (sl - entry) / entry;
+    var liq = side === "LONG" ? entry * (1 - 0.9 / lev) : entry * (1 + 0.9 / lev);
+
+    out.innerHTML = [
+      '<div>Notional Posisi: <strong>$' + notional.toFixed(2) + ' USDT</strong> (' + lev + 'x) • Est. Likuidasi: <strong style="color:var(--red);">' + fmtP(liq) + '</strong></div>',
+      '<div style="margin-top:4px;">Unrealized PnL Live (' + fmtP(liveP) + '): <strong style="color:' + (pnlNow >= 0 ? "var(--green)" : "var(--red)") + ';">' + (pnlNow >= 0 ? "+" : "") + '$' + pnlNow.toFixed(2) + ' USDT (' + (move * lev * 100).toFixed(1) + '% ROE)</strong></div>',
+      '<div style="color:var(--green);margin-top:4px;">Target Profit di TP: <strong>+$' + (notional * tpMove).toFixed(2) + ' USDT</strong> (' + (tpMove * lev * 100).toFixed(1) + '% ROE)</div>',
+      '<div style="color:var(--red);margin-top:4px;">Risiko Maksimal di SL: <strong>-$' + Math.abs(notional * slMove).toFixed(2) + ' USDT</strong> (' + (slMove * lev * 100).toFixed(1) + '% ROE)</div>'
+    ].join("");
+  };
+
+  window.openTradeLogModal = function() {
+    renderLogsUI();
+    document.getElementById("tradeLogModal").classList.add("open");
+  };
+
+  window.saveNewLog = function() {
+    var sym = (document.getElementById("lSym").value.trim().toUpperCase() || (app.mode === "futures" ? app.futCoin : app.udCoin));
+    var dir = document.getElementById("lDir").value;
+    var entry = document.getElementById("lEntry").value.trim() || "-";
+    var res = document.getElementById("lRes").value;
+    var pnl = parseFloat(document.getElementById("lPnl").value) || 0;
+    var time = document.getElementById("hdrClock").textContent;
+    app.logs.unshift({ sym: sym, dir: dir, entry: entry, res: res, pnl: pnl, time: time });
+    writeStore("hc24_logs", app.logs);
+    document.getElementById("lPnl").value = "";
+    renderLogsUI();
+    toast("Catatan trade tersimpan!");
+  };
+
+  window.delLog = function(i) {
+    app.logs.splice(i, 1);
+    writeStore("hc24_logs", app.logs);
+    renderLogsUI();
+  };
+
+  function renderLogsUI() {
+    var badge = document.getElementById("logCounter");
+    if (badge) badge.textContent = app.logs.length;
+    var sum = document.getElementById("logSummaryBox");
+    var list = document.getElementById("logItemsList");
+    if (!list) return;
+
+    var net = app.logs.reduce(function(a, b) { return a + (Number(b.pnl) || 0); }, 0);
+    var wins = app.logs.filter(function(x) { return x.res === "WIN" || x.pnl > 0; }).length;
+    if (sum) {
+      sum.innerHTML = 'Total: <strong>' + app.logs.length + '</strong> • Win: <strong style="color:var(--green);">' + wins + '</strong> • Net PnL: <strong style="color:' + (net >= 0 ? "var(--green)" : "var(--red)") + ';">' + (net >= 0 ? "+" : "") + net.toFixed(2) + ' USDT</strong>';
+    }
+
+    if (app.logs.length === 0) {
+      list.innerHTML = '<div style="color:var(--text-muted);">Belum ada riwayat trade tercatat.</div>';
+      return;
+    }
+    list.innerHTML = app.logs.map(function(it, idx) {
+      return [
+        '<div class="muak-panel mono" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">',
+        '  <span><strong>' + it.sym + '</strong> • ' + it.dir + ' • ' + it.entry + ' • <span style="color:var(--text-muted);">' + it.time + '</span></span>',
+        '  <span style="display:flex;align-items:center;gap:8px;">',
+        '    <strong style="color:' + (it.pnl >= 0 ? "var(--green)" : "var(--red)") + ';">' + it.res + ' (' + (it.pnl >= 0 ? "+" : "") + Number(it.pnl).toFixed(2) + ' USDT)</strong>',
+        '    <button class="btn" style="padding:2px 6px;" onclick="delLog(' + idx + ')">×</button>',
+        '  </span>',
+        '</div>'
+      ].join("");
+    }).join("");
+  }
+
+  window.closeModal = function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove("open");
+  };
+
+  // =========================================================================
+  // 9. BOOTSTRAP
+  // =========================================================================
+  window.addEventListener("load", async function() {
+    renderCoinChips();
+    renderLogsUI();
+    tickClock();
+    setInterval(tickClock, 1000);
+
+    await syncPrices1s();
+    await refreshAllVisibleKlines();
+
+    setInterval(syncPrices1s, 1000);
+    setInterval(refreshAllVisibleKlines, 10000);
+
+    window.addEventListener("resize", renderAllCharts);
+  });
+})();
+</script>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js");
+  }
+</script>
+</body>
+</html>
