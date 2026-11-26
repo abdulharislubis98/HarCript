@@ -1214,7 +1214,8 @@
   }
 
   async function loadKlines(sym, tf, limit) {
-    var lim = limit || 120;
+    // Pull up to 260 candles for accurate EMA(99) warmup; visual screen window = 172 candles
+    var lim = limit || 260;
     try {
       var raw = await apiGet("/klines?symbol=" + sym + "&interval=" + tf + "&limit=" + lim);
       if (Array.isArray(raw) && raw.length > 0) {
@@ -1245,16 +1246,16 @@
   async function refreshAllVisibleKlines() {
     if (app.mode === "futures") {
       await Promise.all(["5m", "15m", "30m", "1h"].map(function(tf) {
-        return loadKlines(app.futCoin, tf, 120);
+        return loadKlines(app.futCoin, tf, 260);
       }));
     } else {
       if (app.udView === "per_time") {
         await Promise.all(CORE_3.map(function(s) {
-          return loadKlines(s, app.udDur, 120);
+          return loadKlines(s, app.udDur, 260);
         }));
       } else {
         await Promise.all(["5m", "15m", "1h", "1d"].map(function(tf) {
-          return loadKlines(app.udCoin, tf, 120);
+          return loadKlines(app.udCoin, tf, 260);
         }));
       }
     }
@@ -1275,7 +1276,7 @@
   };
 
   // =========================================================================
-  // 3. TECHNICAL INDICATORS (EMA, RSI6, ADX14, ATR14, OBV vs EMA10)
+  // 3. TECHNICAL INDICATORS (172-CANDLE SCREEN ENGINE + 36-54 LOCAL SWING)
   // =========================================================================
   function calcEMA(arr, period) {
     if (!arr || arr.length === 0) return [];
@@ -1367,6 +1368,9 @@
         obv: { obv: 0, ema10: 0, bullish: false },
         volCur: 0, volMa5: 0,
         swingHigh: 0, swingLow: 0,
+        localHigh36: 0, localLow36: 0,
+        localHigh54: 0, localLow54: 0,
+        screenHigh172: 0, screenLow172: 0,
         ema7Arr: [], ema25Arr: [], ema99Arr: [],
         footer: {
           regime: "SIDEWAYS",
@@ -1381,23 +1385,33 @@
       };
     }
 
+    // Warmup indicators on full history, then lock structural screen view to exact 172 candles
     var closes = candles.map(function(c) { return c.close; });
     var ema7Arr = calcEMA(closes, 7);
     var ema25Arr = calcEMA(closes, 25);
     var ema99Arr = calcEMA(closes, 99);
-    var last = candles[candles.length - 1];
-    var recent30 = candles.slice(-30);
-    var swingHigh = Math.max.apply(null, recent30.map(function(c) { return c.high; }));
-    var swingLow = Math.min.apply(null, recent30.map(function(c) { return c.low; }));
-    var last5 = candles.slice(-5).map(function(c) { return c.volume; });
+
+    var screen172 = candles.slice(-172);
+    var last = screen172[screen172.length - 1];
+    var recent36 = screen172.slice(-36);
+    var recent54 = screen172.slice(-54);
+
+    var localHigh36 = Math.max.apply(null, recent36.map(function(c) { return c.high; }));
+    var localLow36 = Math.min.apply(null, recent36.map(function(c) { return c.low; }));
+    var localHigh54 = Math.max.apply(null, recent54.map(function(c) { return c.high; }));
+    var localLow54 = Math.min.apply(null, recent54.map(function(c) { return c.low; }));
+    var screenHigh172 = Math.max.apply(null, screen172.map(function(c) { return c.high; }));
+    var screenLow172 = Math.min.apply(null, screen172.map(function(c) { return c.low; }));
+
+    var last5 = screen172.slice(-5).map(function(c) { return c.volume; });
     var volMa5 = last5.reduce(function(a, b) { return a + b; }, 0) / last5.length;
 
     var e7 = ema7Arr[ema7Arr.length - 1];
     var e25 = ema25Arr[ema25Arr.length - 1];
     var e99 = ema99Arr[ema99Arr.length - 1];
     var rsi6 = calcRSI(closes, 6);
-    var adx14 = calcADX(candles, 14);
-    var atr14 = calcATR(candles, 14);
+    var adx14 = calcADX(screen172, 14);
+    var atr14 = calcATR(screen172, 14);
     var obv = calcOBV(candles);
 
     var bullPts = 0, bearPts = 0;
@@ -1426,6 +1440,10 @@
       emaTxt = "Uptrend Penuh: Harga > E7 (" + fmtP(e7) + ") > E25 (" + fmtP(e25) + ") > E99 (" + fmtP(e99) + ")";
     } else if (last.close < e7 && e7 < e25 && e25 < e99) {
       emaTxt = "Breakdown Penuh: Harga < E7 (" + fmtP(e7) + ") < E25 (" + fmtP(e25) + ") < E99 (" + fmtP(e99) + ")";
+    } else if (last.close > e99 && e7 > e99) {
+      emaTxt = "Breakout Bullish: Harga & E7 (" + fmtP(e7) + ") > E99 (" + fmtP(e99) + ") | E25: " + fmtP(e25);
+    } else if (last.close < e99 && e7 < e99) {
+      emaTxt = "Breakdown Bearish: Harga & E7 (" + fmtP(e7) + ") < E99 (" + fmtP(e99) + ") | E25: " + fmtP(e25);
     } else if (last.close > e25 && e7 > e25) {
       emaTxt = "Momentum Naik: Harga > E7 (" + fmtP(e7) + ") > E25 (" + fmtP(e25) + ") | E99: " + fmtP(e99);
     } else if (last.close < e25 && e7 < e25) {
@@ -1450,7 +1468,10 @@
       ema7: e7, ema25: e25, ema99: e99,
       rsi6: rsi6, adx14: adx14, atr14: atr14,
       obv: obv, volCur: last.volume, volMa5: volMa5,
-      swingHigh: swingHigh, swingLow: swingLow,
+      swingHigh: localHigh36, swingLow: localLow36,
+      localHigh36: localHigh36, localLow36: localLow36,
+      localHigh54: localHigh54, localLow54: localLow54,
+      screenHigh172: screenHigh172, screenLow172: screenLow172,
       ema7Arr: ema7Arr, ema25Arr: ema25Arr, ema99Arr: ema99Arr,
       footer: {
         regime: regime,
@@ -1512,7 +1533,7 @@
   async function evaluatePureMomentumUpDown(sym, dur) {
     var tfs = UD_TF_MAP[dur] || ["1m", "5m", "15m"];
     var sets = await Promise.all(tfs.map(function(tf) {
-      return loadKlines(sym, tf, 110);
+      return loadKlines(sym, tf, 220);
     }));
 
     var aTrig = analyzeCandles(sets[0]);
@@ -1528,24 +1549,19 @@
     var upScore = 0;
     var dnScore = 0;
 
-    // 1. Live price vs Session Open (32 pts)
     if (livePrice > openPrice) upScore += 32;
     else if (livePrice < openPrice) dnScore += 32;
 
-    // 2. Trigger TF EMA7 vs EMA25 momentum (26 pts)
     if (aTrig.close > aTrig.ema7 && aTrig.ema7 > aTrig.ema25) upScore += 26;
     else if (aTrig.close < aTrig.ema7 && aTrig.ema7 < aTrig.ema25) dnScore += 26;
     else if (aTrig.close > aTrig.ema25) upScore += 14;
     else if (aTrig.close < aTrig.ema25) dnScore += 14;
 
-    // 3. Session TF EMA25 & OBV alignment (24 pts)
     if (aSess.close > aSess.ema25) upScore += 14; else dnScore += 14;
     if (aSess.obv.bullish) upScore += 10; else dnScore += 10;
 
-    // 4. Macro TF trend tailwind (18 pts — supportive only, never blind override)
     if (aMacro.close > aMacro.ema25) upScore += 18; else dnScore += 18;
 
-    // STRICT DIRECTIONAL LOCK (NO BLIND TOP/BOTTOM PICKING)
     var priceAboveOpen = livePrice > openPrice;
     var bullishFlow = priceAboveOpen && aTrig.ema7 > aTrig.ema25 && aSess.close > aSess.ema25;
     var bearishFlow = !priceAboveOpen && aTrig.ema7 < aTrig.ema25 && aSess.close < aSess.ema25;
@@ -1562,13 +1578,11 @@
     var confidence = Math.min(95, Math.max(48, Math.round(direction === "NAIK" ? upScore : dnScore)));
     var warningNote = "";
 
-    // GUARD A: Choppy / Sideways Market Lock (ADX < 20 & tight range around Open)
     if (aSess.adx14 < 20 && distAbs < atrRef * 0.35) {
       confidence = Math.min(confidence, 55);
       warningNote = "⏸️ Sideways (ADX " + aSess.adx14.toFixed(0) + " < 20) & jarak tipis ke Open — tahan dulu.";
     }
 
-    // GUARD B: Safe Entry Window (Time-Decay Guard)
     var timing = getSessionRemainingInfo(dur);
     if (timing.tooLate && ((direction === "NAIK" && aTrig.rsi6 > 78) || (direction === "TURUN" && aTrig.rsi6 < 22))) {
       confidence = Math.min(confidence, 58);
@@ -1578,7 +1592,6 @@
       warningNote = "🟡 Sisa waktu sesi tinggal sebentar — klik ideal berikutnya: " + timing.nextIdeal + ".";
     }
 
-    // GUARD C: Overextended Warning (Lowers confidence to Yellow instead of flipping direction!)
     if (!warningNote && direction === "NAIK" && aTrig.rsi6 > 84) {
       confidence = Math.min(confidence, 68);
       warningNote = "🟡 Momentum NAIK kuat tapi RSI(6) tinggi (" + aTrig.rsi6.toFixed(0) + ") — siap-siap retest tipis.";
@@ -1663,27 +1676,48 @@
   }
 
   // =========================================================================
-  // 5. MODE FUTURES ENGINE (MASTER CALL MUAK ULTIMATE)
+  // 5. MODE FUTURES ENGINE (172-CANDLE SCREEN-MATCHED MASTER CALL MUAK)
   // =========================================================================
   function getVolProfile(sym) {
     if (sym === "BTCUSDT" || sym === "ETHUSDT") {
-      return { pct: 0.0075, label: "0.75%", tag: "Anti-Jarum Mega-Cap Buffer" };
+      return {
+        slPct: 0.0070,
+        maxEntryDist: 0.0045,
+        tp1Cap: 0.0085,
+        tp2Cap: 0.0170,
+        label: "0.70%",
+        tag: "Anti-Jarum Mega-Cap (172-Candle)"
+      };
     }
     if (sym === "BNBUSDT" || sym === "SOLUSDT" || sym === "XRPUSDT") {
-      return { pct: 0.0110, label: "1.10%", tag: "Anti-Jarum Large-Cap Buffer" };
+      return {
+        slPct: 0.0105,
+        maxEntryDist: 0.0065,
+        tp1Cap: 0.0120,
+        tp2Cap: 0.0230,
+        label: "1.05%",
+        tag: "Anti-Jarum Large-Cap (172-Candle)"
+      };
     }
-    return { pct: 0.0155, label: "1.55%", tag: "Anti-Jarum High-Vol Altcoin Buffer" };
+    return {
+      slPct: 0.0145,
+      maxEntryDist: 0.0085,
+      tp1Cap: 0.0160,
+      tp2Cap: 0.0300,
+      label: "1.45%",
+      tag: "Anti-Jarum High-Vol Altcoin (172-Candle)"
+    };
   }
 
   async function executeFuturesMuakUltimate() {
     var sym = app.futCoin;
-    toast("Menjalankan MASTER CALL MUAK ULTIMATE (" + sym + ")...");
+    toast("Menjalankan MASTER CALL MUAK ULTIMATE (" + sym + " • 172 Candle)...");
 
     var sets = await Promise.all([
-      loadKlines(sym, "5m", 120),
-      loadKlines(sym, "15m", 120),
-      loadKlines(sym, "30m", 120),
-      loadKlines(sym, "1h", 120)
+      loadKlines(sym, "5m", 260),
+      loadKlines(sym, "15m", 260),
+      loadKlines(sym, "30m", 260),
+      loadKlines(sym, "1h", 260)
     ]);
 
     var a5 = analyzeCandles(sets[0]);
@@ -1694,76 +1728,115 @@
     var live = app.prices[sym] || {
       price: a5.close,
       chgPct: 0,
-      h24: Math.max(a1h.swingHigh, a5.high),
-      l24: Math.min(a1h.swingLow, a5.low)
+      h24: a15.localHigh54,
+      l24: a15.localLow54
     };
     var price = live.price || a5.close;
-    var h24 = Math.max(live.h24 || 0, a1h.swingHigh);
-    var l24 = Math.min(live.l24 || Infinity, a1h.swingLow);
+    var h24 = live.h24 || a15.localHigh54;
+    var l24 = live.l24 || a15.localLow54;
 
+    // 1. MULTI-TF BIAS INCLUDING BREAKOUT TRANSITION (EMA7 > EMA99 > EMA25)
     var bullPts = 0, bearPts = 0;
-    if (price > a1h.ema99) bullPts += 30; else bearPts += 30;
+
+    if (price > a1h.ema99 && a1h.ema7 > a1h.ema99) bullPts += 32;
+    else if (price < a1h.ema99 && a1h.ema7 < a1h.ema99) bearPts += 32;
+    else if (price > a1h.ema99) bullPts += 24;
+    else bearPts += 24;
+
     if (price > a30.ema25 && a30.ema7 > a30.ema25) bullPts += 20;
     else if (price < a30.ema25 && a30.ema7 < a30.ema25) bearPts += 20;
-    else if (price > a30.ema25) bullPts += 10; else bearPts += 10;
+    else if (price > a30.ema99) bullPts += 14;
+    else bearPts += 14;
 
-    if (price > a15.ema25 && a15.ema7 > a15.ema25) bullPts += (a15.adx14 >= 22 ? 20 : 14);
-    else if (price < a15.ema25 && a15.ema7 < a15.ema25) bearPts += (a15.adx14 >= 22 ? 20 : 14);
+    if (price > a15.ema25 && a15.ema7 > a15.ema25) bullPts += (a15.adx14 >= 20 ? 20 : 15);
+    else if (price < a15.ema25 && a15.ema7 < a15.ema25) bearPts += (a15.adx14 >= 20 ? 20 : 15);
+    else if (price > a15.ema99) bullPts += 12;
+    else bearPts += 12;
 
-    if (price > a5.ema25 && a5.obv.bullish) bullPts += 20;
-    else if (price < a5.ema25 && !a5.obv.bullish) bearPts += 20;
-    else if (a5.obv.bullish) bullPts += 10; else bearPts += 10;
-
-    if (a15.obv.bullish) bullPts += 10; else bearPts += 10;
+    if (a5.obv.bullish) bullPts += 14; else bearPts += 14;
+    if (a15.obv.bullish && a1h.obv.bullish) bullPts += 14;
+    else if (!a15.obv.bullish && !a1h.obv.bullish) bearPts += 14;
+    else if (a15.obv.bullish) bullPts += 7; else bearPts += 7;
 
     var isLong = bullPts >= bearPts;
-    var confidence = Math.min(96, Math.max(50, Math.round(isLong ? bullPts : bearPts)));
+    var confidence = Math.min(96, Math.max(52, Math.round(isLong ? bullPts : bearPts)));
     var bias = isLong ? "LONG" : "SHORT";
     var prof = getVolProfile(sym);
 
+    // 2. MAGNET ONE ENTRY DEKAT (EMA7 1H / EMA25 15M / EMA99 5M / EMA7 5M)
     var entryPrice;
     if (isLong) {
-      var lCluster = [a1h.ema99, a15.ema7, a15.ema25, a5.ema25].filter(function(v) {
-        return v > 0 && v <= price * 1.003;
+      var minValidLong = price * (1 - prof.maxEntryDist);
+      var lCandidates = [a1h.ema7, a15.ema25, a5.ema99, a5.ema7, a1h.ema99].filter(function(v) {
+        return v >= minValidLong && v <= price * 1.0005;
       });
-      entryPrice = lCluster.length > 0
-        ? lCluster.reduce(function(s, v) { return s + v; }, 0) / lCluster.length
-        : price * 0.9985;
+      if (lCandidates.length > 0) {
+        entryPrice = lCandidates.reduce(function(s, v) { return s + v; }, 0) / lCandidates.length;
+      } else {
+        entryPrice = price * (1 - prof.maxEntryDist * 0.55);
+      }
     } else {
-      var sCluster = [a1h.ema99, a15.ema7, a15.ema25, a5.ema25].filter(function(v) {
-        return v > 0 && v >= price * 0.997;
+      var maxValidShort = price * (1 + prof.maxEntryDist);
+      var sCandidates = [a1h.ema7, a15.ema25, a5.ema99, a5.ema7, a1h.ema99].filter(function(v) {
+        return v <= maxValidShort && v >= price * 0.9995;
       });
-      entryPrice = sCluster.length > 0
-        ? sCluster.reduce(function(s, v) { return s + v; }, 0) / sCluster.length
-        : price * 1.0015;
+      if (sCandidates.length > 0) {
+        entryPrice = sCandidates.reduce(function(s, v) { return s + v; }, 0) / sCandidates.length;
+      } else {
+        entryPrice = price * (1 + prof.maxEntryDist * 0.55);
+      }
     }
 
+    // 3. SL MUAK ULTIMATE (LOCAL 36-CANDLE SWING + ANTI-WICK BUFFER)
     var slPrice, swingAnchor, expiryPrice;
     if (isLong) {
-      swingAnchor = Math.min(l24, a5.swingLow, a15.swingLow);
-      slPrice = Math.min(entryPrice * (1 - prof.pct), swingAnchor * (1 - prof.pct * 0.35));
-      expiryPrice = swingAnchor * 0.999;
+      swingAnchor = Math.min(a5.localLow36, a15.localLow36);
+      var minSl = entryPrice * (1 - prof.slPct * 1.35);
+      var maxSl = entryPrice * (1 - prof.slPct * 0.85);
+      var rawSl = Math.min(entryPrice * (1 - prof.slPct), swingAnchor * (1 - prof.slPct * 0.25));
+      slPrice = Math.max(minSl, Math.min(maxSl, rawSl));
+      expiryPrice = Math.min(swingAnchor, slPrice * 1.001);
     } else {
-      swingAnchor = Math.max(h24, a5.swingHigh, a15.swingHigh);
-      slPrice = Math.max(entryPrice * (1 + prof.pct), swingAnchor * (1 + prof.pct * 0.35));
-      expiryPrice = swingAnchor * 1.001;
+      swingAnchor = Math.max(a5.localHigh36, a15.localHigh36);
+      var minSlS = entryPrice * (1 + prof.slPct * 0.85);
+      var maxSlS = entryPrice * (1 + prof.slPct * 1.35);
+      var rawSlS = Math.max(entryPrice * (1 + prof.slPct), swingAnchor * (1 + prof.slPct * 0.25));
+      slPrice = Math.min(maxSlS, Math.max(minSlS, rawSlS));
+      expiryPrice = Math.max(swingAnchor, slPrice * 0.999);
     }
 
+    // 4. TP1 (GESER BEP) & TP FINAL REALISTIS (DIBATASI 24H HIGH/LOW & LOKAL 54 CANDLE)
     var riskPts = Math.abs(entryPrice - slPrice);
     var tp1Price, tpFinalPrice;
     if (isLong) {
-      var nearL = Math.max(a15.ema99, a1h.ema25, entryPrice + riskPts * 0.70);
-      tp1Price = nearL > entryPrice ? nearL : entryPrice + riskPts * 0.70;
-      var farL = Math.max(a5.swingHigh, a1h.swingHigh, entryPrice + riskPts * 1.40);
-      tpFinalPrice = farL > tp1Price ? farL : tp1Price + riskPts * 0.70;
+      var ceil24 = h24 > entryPrice ? h24 : entryPrice * (1 + prof.tp2Cap);
+      var localPeak = Math.max(a5.localHigh36, a15.localHigh36);
+      var rawTp1 = localPeak > entryPrice * 1.002 ? localPeak : entryPrice + riskPts * 0.95;
+      tp1Price = Math.min(rawTp1, entryPrice * (1 + prof.tp1Cap));
+      if (tp1Price <= entryPrice * 1.0015) tp1Price = entryPrice + riskPts * 0.85;
+
+      var rawTp2 = Math.min(ceil24, Math.max(a5.localHigh54, a15.localHigh54, entryPrice + riskPts * 1.75));
+      tpFinalPrice = Math.min(rawTp2, entryPrice * (1 + prof.tp2Cap));
+      if (tpFinalPrice <= tp1Price * 1.0015) {
+        tpFinalPrice = Math.min(ceil24, tp1Price + riskPts * 0.85);
+        if (tpFinalPrice <= tp1Price) tpFinalPrice = tp1Price + riskPts * 0.80;
+      }
     } else {
-      var nearS = Math.min(a15.ema99, a1h.ema25, entryPrice - riskPts * 0.70);
-      tp1Price = nearS < entryPrice ? nearS : entryPrice - riskPts * 0.70;
-      var farS = Math.min(a5.swingLow, a1h.swingLow, entryPrice - riskPts * 1.40);
-      tpFinalPrice = farS < tp1Price ? farS : tp1Price - riskPts * 0.70;
+      var floor24 = (l24 > 0 && l24 < entryPrice) ? l24 : entryPrice * (1 - prof.tp2Cap);
+      var localBottom = Math.min(a5.localLow36, a15.localLow36);
+      var rawTp1S = localBottom < entryPrice * 0.998 ? localBottom : entryPrice - riskPts * 0.95;
+      tp1Price = Math.max(rawTp1S, entryPrice * (1 - prof.tp1Cap));
+      if (tp1Price >= entryPrice * 0.9985) tp1Price = entryPrice - riskPts * 0.85;
+
+      var rawTp2S = Math.max(floor24, Math.min(a5.localLow54, a15.localLow54, entryPrice - riskPts * 1.75));
+      tpFinalPrice = Math.max(rawTp2S, entryPrice * (1 - prof.tp2Cap));
+      if (tpFinalPrice >= tp1Price * 0.9985) {
+        tpFinalPrice = Math.max(floor24, tp1Price - riskPts * 0.85);
+        if (tpFinalPrice >= tp1Price) tpFinalPrice = tp1Price - riskPts * 0.80;
+      }
     }
 
-    var rrRatio = riskPts > 0 ? (Math.abs(tpFinalPrice - entryPrice) / riskPts).toFixed(2) : "1.35";
+    var rrRatio = riskPts > 0 ? (Math.abs(tpFinalPrice - entryPrice) / riskPts).toFixed(2) : "1.65";
 
     app.overlayLines = [
       { label: "ENTRY " + bias, price: entryPrice, color: "#1d4ed8", dash: [] },
@@ -1797,8 +1870,8 @@
 
     var isLong = sig.bias === "LONG";
     var biasDesc = isLong
-      ? "LONG 🟢 (EMA99 1H Support Bounce & LTF Breakout Above EMA7/EMA25 Cluster)"
-      : "SHORT 🔴 (EMA99 1H Ceiling Rejection & LTF Breakdown Below EMA7/EMA25 Cluster)";
+      ? "LONG 🟢 (172-Candle Breakout Above EMA99 1H & Pullback Cluster EMA7 1H / EMA25 15M / EMA99 5M)"
+      : "SHORT 🔴 (172-Candle Breakdown Below EMA99 1H & Retest Cluster EMA7 1H / EMA25 15M / EMA99 5M)";
 
     panel.innerHTML = [
       '<div class="sig-head">',
@@ -1807,7 +1880,7 @@
       '      <span class="sig-title">🧠 MASTER CALL MUAK ULTIMATE – ' + sig.sym + '</span>',
       '      <span class="conf-badge ' + tier + ' mono">🎯 KEYAKINAN SINYAL: ' + sig.confidence + '% • ' + tierLbl + '</span>',
       '    </div>',
-      '    <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">Mode: <strong>ONE ENTRY</strong> • <span id="muakLiveCountdown" class="mono" style="color:var(--amber);font-weight:800;">⏱ Valid 90:00</span> • Auto-Profile SL (' + sig.prof.tag + ') • TF: 5M – 15M – 30M – 1H</div>',
+      '    <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">Mode: <strong>ONE ENTRY (172-Candle Engine)</strong> • <span id="muakLiveCountdown" class="mono" style="color:var(--amber);font-weight:800;">⏱ Valid 90:00</span> • Auto-Profile SL (' + sig.prof.tag + ') • TF: 5M – 15M – 30M – 1H</div>',
       '  </div>',
       '  <div class="flex-row">',
       '    <button class="btn btn-dark" onclick="copyMuakText()">📋 Salin Sinyal MUAK</button>',
@@ -1816,28 +1889,28 @@
       '</div>',
       '<div class="muak-cols">',
       '  <div class="muak-panel ' + (isLong ? "long" : "short") + '">',
-      '    <h4>BIAS &amp; ALASAN STRUKTURAL</h4>',
+      '    <h4>BIAS &amp; ALASAN STRUKTURAL (172 CANDLE)</h4>',
       '    <div style="font-weight:800;margin-bottom:6px;color:' + (isLong ? "var(--green)" : "var(--red)") + ';">' + biasDesc + '</div>',
       '    <ul>',
-      '      <li><strong>EMA99 1H (' + fmtP(sig.a1h.ema99) + ') &amp; 24H Range:</strong> Harga live <span class="mono">' + fmtP(sig.price) + '</span> berada ' + (isLong ? "di atas pijakan" : "di bawah benteng") + ' EMA99 1H (H24: ' + fmtP(sig.h24) + ' | L24: ' + fmtP(sig.l24) + ').</li>',
-      '      <li><strong>LTF EMA Cluster (5M &amp; 15M):</strong> 5M E7 (' + fmtP(sig.a5.ema7) + ') / E25 (' + fmtP(sig.a5.ema25) + ') &amp; 15M E7 (' + fmtP(sig.a15.ema7) + ') / E25 (' + fmtP(sig.a15.ema25) + ') selaras dengan 30M E7 (' + fmtP(sig.a30.ema7) + ').</li>',
-      '      <li><strong>OBV &amp; HTF Volume:</strong> OBV 5M (' + (sig.a5.obv.bullish ? "Akumulasi > EMA10" : "Distribusi < EMA10") + ') &amp; 15M (' + (sig.a15.obv.bullish ? "Akumulasi > EMA10" : "Distribusi < EMA10") + ') | Vol 1H: <span class="mono">' + fmtK(sig.a1h.volCur) + '</span> vs MA5 <span class="mono">' + fmtK(sig.a1h.volMa5) + '</span>.</li>',
+      '      <li><strong>EMA99 1H (' + fmtP(sig.a1h.ema99) + ') &amp; 24H Range:</strong> Harga live <span class="mono">' + fmtP(sig.price) + '</span> ' + (isLong ? "bertahan di atas" : "tertahan di bawah") + ' EMA99 1H (H24: ' + fmtP(sig.h24) + ' | L24: ' + fmtP(sig.l24) + ').</li>',
+      '      <li><strong>Cluster Magnet Entry:</strong> 1H E7 (<span class="mono">' + fmtP(sig.a1h.ema7) + '</span>) • 15M E25 (<span class="mono">' + fmtP(sig.a15.ema25) + '</span>) • 5M E99 (<span class="mono">' + fmtP(sig.a5.ema99) + '</span>) | RSI(6) 5M: <span class="mono">' + sig.a5.rsi6.toFixed(1) + '</span>.</li>',
+      '      <li><strong>OBV &amp; HTF Volume:</strong> OBV 5M (' + (sig.a5.obv.bullish ? "Akumulasi > EMA10" : "Distribusi < EMA10") + ') &amp; 1H (' + (sig.a1h.obv.bullish ? "Akumulasi > EMA10" : "Distribusi < EMA10") + ') | Vol 1H: <span class="mono">' + fmtK(sig.a1h.volCur) + '</span> vs MA5 <span class="mono">' + fmtK(sig.a1h.volMa5) + '</span>.</li>',
       '    </ul>',
       '  </div>',
       '  <div class="muak-panel">',
       '    <h4>ONE ENTRY &amp; SL AUTO-PROFILE MUAK (' + sig.prof.label + ')</h4>',
       '    <ul>',
-      '      <li><strong>📌 ONE ENTRY (' + sig.bias + '): <span class="mono" style="color:var(--primary);font-size:13px;">' + fmtP(sig.entryPrice) + '</span></strong> — Retest presisi pada cluster EMA99 1H, EMA7/25 15M, &amp; EMA25 5M.</li>',
-      '      <li><strong>📌 SL MUAK Ultimate: <span class="mono" style="color:var(--red);font-size:13px;">' + fmtP(sig.slPrice) + '</span></strong> — Aman di ' + (isLong ? "bawah" : "atas") + ' batas 24H &amp; Swing lokal (<span class="mono">' + fmtP(isLong ? sig.l24 : sig.h24) + '</span>) + buffer ' + sig.prof.label + '.</li>',
+      '      <li><strong>📌 ONE ENTRY (' + sig.bias + '): <span class="mono" style="color:var(--primary);font-size:13px;">' + fmtP(sig.entryPrice) + '</span></strong> — Pullback presisi pada cluster EMA7 1H / EMA25 15M / EMA99 5M (mudah tersentuh).</li>',
+      '      <li><strong>📌 SL MUAK Ultimate: <span class="mono" style="color:var(--red);font-size:13px;">' + fmtP(sig.slPrice) + '</span></strong> — Aman di ' + (isLong ? "bawah" : "atas") + ' swing lokal 36-candle (<span class="mono">' + fmtP(isLong ? sig.a5.localLow36 : sig.a5.localHigh36) + '</span>) + buffer ' + sig.prof.label + '.</li>',
       '      <li><strong>📌 TP1: <span class="mono" style="color:var(--green);">' + fmtP(sig.tp1Price) + '</span></strong> (Ambil TP1 &amp; <strong>wajib geser SL ke BEP / SL+</strong> saat tersentuh).</li>',
-      '      <li><strong>📌 TP FINAL: <span class="mono" style="color:var(--green);">' + fmtP(sig.tpFinalPrice) + '</span></strong> (Target struktur lanjutan • <strong>R:R ≈ 1 : ' + sig.rrRatio + '</strong>).</li>',
+      '      <li><strong>📌 TP FINAL: <span class="mono" style="color:var(--green);">' + fmtP(sig.tpFinalPrice) + '</span></strong> (Target lokal dibatasi 24H High/Low • <strong>R:R ≈ 1 : ' + sig.rrRatio + '</strong>).</li>',
       '    </ul>',
       '  </div>',
       '  <div class="muak-panel">',
       '    <h4>VALIDASI MUAK &amp; MOMENTUM EXPIRY</h4>',
       '    <ul>',
-      '      <li>✔ <strong>EMA99 1H Alignment</strong> → Struktur utama 1H terkonfirmasi ' + (isLong ? "Bullish" : "Bearish") + '.</li>',
-      '      <li>✔ <strong>LTF EMA7/25 Confluence</strong> → 5M &amp; 15M searah tanpa melawan arus besar.</li>',
+      '      <li>✔ <strong>172-Candle Visual Calibration</strong> → Jendela struktur &amp; jarak target disamakan persis dengan chart layar HP.</li>',
+      '      <li>✔ <strong>LTF EMA7/25/99 Confluence</strong> → Zona entry realistis tanpa menunggu koreksi ekstrem 24 jam.</li>',
       '      <li>✔ <strong>OBV &amp; Momentum Check</strong> → Arus OBV terhadap EMA10 &amp; Volume tervalidasi.</li>',
       '      <li style="color:#b45309;font-weight:800;">⏳ <strong>MOMENTUM EXPIRY:</strong> Jika dalam 4 candle 5M close bertahan di ' + (isLong ? "bawah" : "atas") + ' <span class="mono">' + fmtP(sig.expiryPrice) + '</span>, sinyal hangus (cancel bias).</li>',
       '    </ul>',
@@ -1885,7 +1958,7 @@
   };
 
   // =========================================================================
-  // 6. HIGH-DPI CANVAS CHARTS & 4-BOX MULTI-FACTOR FOOTER
+  // 6. HIGH-DPI CANVAS CHARTS & 4-BOX MULTI-FACTOR FOOTER (GRID 2x2 UTUH)
   // =========================================================================
   function renderAllCharts() {
     var matrix = document.getElementById("chartsMatrix");
@@ -2016,7 +2089,7 @@
       return;
     }
 
-    var vis = candles.slice(-56);
+    var vis = candles.slice(-72);
     var st = analyzeCandles(candles);
     var e7 = st.ema7Arr.slice(-vis.length);
     var e25 = st.ema25Arr.slice(-vis.length);
@@ -2097,7 +2170,7 @@
       var yc = toY(c.close);
       var bTop = Math.min(yo, yc);
       var bH = Math.max(1.8, Math.abs(yc - yo));
-      var bW = Math.max(2.4, stepX * 0.62);
+      var bW = Math.max(2.0, stepX * 0.62);
       ctx.fillRect(xc - bW / 2, bTop, bW, bH);
     });
 
@@ -2384,11 +2457,11 @@
     var c15 = analyzeCandles(app.klines[sym + "_15m"] || []);
     var c1h = analyzeCandles(app.klines[sym + "_1h"] || []);
     var txt = [
-      "📊 HARCRIPT v2.4 SNAPSHOT — " + sym,
+      "📊 HARCRIPT v2.4 SNAPSHOT (172-CANDLE) — " + sym,
       "Harga Live: " + fmtP(price),
-      "5M: Close " + fmtP(c5.close) + " | E7 " + fmtP(c5.ema7) + " | E25 " + fmtP(c5.ema25) + " | RSI6 " + c5.rsi6.toFixed(1),
+      "5M: Close " + fmtP(c5.close) + " | E7 " + fmtP(c5.ema7) + " | E25 " + fmtP(c5.ema25) + " | E99 " + fmtP(c5.ema99) + " | RSI6 " + c5.rsi6.toFixed(1),
       "15M: Close " + fmtP(c15.close) + " | E7 " + fmtP(c15.ema7) + " | E25 " + fmtP(c15.ema25) + " | ADX " + c15.adx14.toFixed(1),
-      "1H: Close " + fmtP(c1h.close) + " | E99 " + fmtP(c1h.ema99)
+      "1H: Close " + fmtP(c1h.close) + " | E7 " + fmtP(c1h.ema7) + " | E99 " + fmtP(c1h.ema99)
     ].join("\n");
     copyTextSafe(txt, "Data live multi-TF disalin!");
   };
