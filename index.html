@@ -2,15 +2,9 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="HarCript v2.4" />
-<meta name="theme-color" content="#1e3a8a" />
-<link rel="manifest" href="./manifest.json" />
-<link rel="apple-touch-icon" sizes="180x180" href="./icon-192.png" />
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+<link rel="manifest" href="manifest.json" />
 <title>HarCript v2.4 — Pure Momentum Naik/Turun &amp; MASTER CALL MUAK ULTIMATE</title>
 <style>
   :root {
@@ -73,7 +67,6 @@
     box-shadow: var(--shadow-sm);
     position: sticky;
     top: 0;
-    padding-top: env(safe-area-inset-top);
     z-index: 40;
   }
 
@@ -893,10 +886,10 @@
       <!-- UP/DOWN SUBBAR -->
       <div id="udControlsBar" class="flex-row" style="width:100%;justify-content:space-between;">
         <div class="flex-row" id="udDurGroup">
-          <button class="chip-btn active" data-dur="5m" onclick="selectUdDur('5m')">⏱ 5 Menit</button>
-          <button class="chip-btn" data-dur="15m" onclick="selectUdDur('15m')">⏱ 15 Menit</button>
-          <button class="chip-btn" data-dur="1h" onclick="selectUdDur('1h')">⏱ 1 Jam</button>
-          <button class="chip-btn" data-dur="1d" onclick="selectUdDur('1d')">⏱ 1 Hari — Reset 23:00 WIB</button>
+          <button class="chip-btn active" data-dur="5m" onclick="selectUdDur('5m')">⏱ 5 Menit <span id="durAcuan_5m" class="lev-pill mono" style="margin-left:4px;">Acuan: --</span></button>
+          <button class="chip-btn" data-dur="15m" onclick="selectUdDur('15m')">⏱ 15 Menit <span id="durAcuan_15m" class="lev-pill mono" style="margin-left:4px;">Acuan: --</span></button>
+          <button class="chip-btn" data-dur="1h" onclick="selectUdDur('1h')">⏱ 1 Jam <span id="durAcuan_1h" class="lev-pill mono" style="margin-left:4px;">Acuan: --</span></button>
+          <button class="chip-btn" data-dur="1d" onclick="selectUdDur('1d')">⏱ 1 Hari (23:00 WIB) <span id="durAcuan_1d" class="lev-pill mono" style="margin-left:4px;">Acuan: --</span></button>
         </div>
 
         <div class="flex-row">
@@ -919,15 +912,19 @@
     <!-- ACTION BAR -->
     <section class="panel-bar">
       <div class="flex-row">
-        <button class="btn btn-gaskan" onclick="handleGaskanClick()">
-          ⚡ GASKAN PnL <span id="gaskanBadge" class="gaskan-chip">3 KOIN SEARAH</span>
+        <button id="btnGaskanMain" class="btn btn-gaskan hidden" onclick="handleGaskanClick()">
+          ⚡ GASKAN PnL <span id="gaskanBadge" class="gaskan-chip">MUAK ULTIMATE</span>
+        </button>
+
+        <button id="btnRecalcStat" class="btn btn-gaskan" onclick="forceRefreshUdStats()">
+          📊 Audit 100 Sesi <span class="gaskan-chip">AUTO-LOCK</span>
         </button>
 
         <button id="btnCekkan" class="btn btn-amber hidden" onclick="openCekkanModal()">📊 Cekkan PnL</button>
 
         <div id="idealWindowPill" class="ideal-badge">
-          <span>⏰</span>
-          <span id="idealWindowTxt">Klik Ideal 5m: Menit ke-1 s/d ke-2 sesi (Sisa 3-4 mnt)</span>
+          <span>🎯</span>
+          <span id="idealWindowTxt">Standar Minimal: ≥ 60% (60–67% Cukup • ≥ 68% Kuat • &lt;60% Skip)</span>
         </div>
       </div>
 
@@ -956,6 +953,9 @@
         <div id="udCountdown" class="timer-val mono">00:00</div>
       </div>
     </section>
+
+    <!-- AUTO-LOCK NAIK/TURUN 100-SESI BOARD (TANPA KLIK GASKAN PnL) -->
+    <section id="udAutoLockBoard" class="signal-card"></section>
 
     <!-- SIGNAL OUTPUT PANEL -->
     <section id="signalOutputPanel" class="signal-card hidden"></section>
@@ -1525,191 +1525,414 @@
   }
 
   // =========================================================================
-  // 4. MODE NAIK / TURUN ENGINE (100% PURE MOMENTUM & TREND FOLLOWER)
+  // 4. MODE NAIK / TURUN ENGINE (BACKTEST 100 SESI CLOSED + AUTO-LOCK ACUAN)
   // =========================================================================
-  var UD_TF_MAP = {
-    "5m": ["1m", "5m", "15m"],
-    "15m": ["3m", "15m", "1h"],
-    "1h": ["15m", "1h", "4h"],
-    "1d": ["1h", "4h", "1d"]
-  };
+  app.udStatsCache = {};
+  app.udStatsLoading = {};
 
-  function getSessionRemainingInfo(dur) {
-    var wib = getWibDate();
-    var m = wib.getMinutes();
-    var s = wib.getSeconds();
-    var h = wib.getHours();
-
-    if (dur === "5m") {
-      var mod5 = m % 5;
-      var rem5 = (4 - mod5) * 60 + (60 - s);
-      var nextM5 = m - mod5 + 5;
-      var nextH5 = h + Math.floor(nextM5 / 60);
-      var nextStr5 = String(nextH5 % 24).padStart(2, "0") + ":" + String((nextM5 % 60) + 1).padStart(2, "0") + " WIB";
-      return { remSec: rem5, tooLate: rem5 < 90, nextIdeal: nextStr5 };
+  async function fetchPaginatedKlines(sym, interval, totalNeeded, endTimeMs) {
+    var collected = [];
+    var cursorEnd = endTimeMs;
+    var guard = 0;
+    while (collected.length < totalNeeded && guard < 6) {
+      guard++;
+      var batch = Math.min(1000, totalNeeded - collected.length + 10);
+      var url = "/klines?symbol=" + sym + "&interval=" + interval + "&limit=" + batch + "&endTime=" + cursorEnd;
+      try {
+        var raw = await apiGet(url);
+        if (!Array.isArray(raw) || raw.length === 0) break;
+        var mapped = raw.map(function(r) {
+          return {
+            openTime: Number(r[0]),
+            open: parseFloat(r[1]),
+            high: parseFloat(r[2]),
+            low: parseFloat(r[3]),
+            close: parseFloat(r[4]),
+            closeTime: Number(r[6])
+          };
+        }).filter(function(c) {
+          return c.closeTime <= endTimeMs;
+        });
+        if (mapped.length === 0) break;
+        collected = mapped.concat(collected);
+        cursorEnd = mapped[0].openTime - 1;
+        if (raw.length < batch) break;
+      } catch (e) {
+        break;
+      }
     }
-    if (dur === "15m") {
-      var mod15 = m % 15;
-      var rem15 = (14 - mod15) * 60 + (60 - s);
-      var nextM15 = m - mod15 + 15;
-      var nextH15 = h + Math.floor(nextM15 / 60);
-      var nextStr15 = String(nextH15 % 24).padStart(2, "0") + ":" + String((nextM15 % 60) + 2).padStart(2, "0") + " WIB";
-      return { remSec: rem15, tooLate: rem15 < 240, nextIdeal: nextStr15 };
+    var seen = {};
+    var dedup = [];
+    for (var i = 0; i < collected.length; i++) {
+      var k = collected[i].openTime;
+      if (!seen[k]) {
+        seen[k] = true;
+        dedup.push(collected[i]);
+      }
     }
-    if (dur === "1h") {
-      var rem1h = (59 - m) * 60 + (60 - s);
-      var nextStr1h = String((h + 1) % 24).padStart(2, "0") + ":05 WIB";
-      return { remSec: rem1h, tooLate: rem1h < 900, nextIdeal: nextStr1h };
-    }
-    var target = new Date(wib);
-    target.setHours(23, 0, 0, 0);
-    if (h >= 23) target.setDate(target.getDate() + 1);
-    var rem1d = Math.max(0, Math.floor((target - wib) / 1000));
-    return { remSec: rem1d, tooLate: rem1d < 7200, nextIdeal: "07:00 - 14:00 WIB" };
+    dedup.sort(function(a, b) { return a.openTime - b.openTime; });
+    return dedup;
   }
 
-  async function evaluatePureMomentumUpDown(sym, dur) {
-    var tfs = UD_TF_MAP[dur] || ["1m", "5m", "15m"];
-    var sets = await Promise.all(tfs.map(function(tf) {
-      return loadKlines(sym, tf, 220);
-    }));
+  function getClosedBoundaryMs(dur, nowMs) {
+    var d = new Date(nowMs);
+    if (dur === "5m") {
+      var step5 = 5 * 60000;
+      return Math.floor(nowMs / step5) * step5;
+    }
+    if (dur === "15m") {
+      var step15 = 15 * 60000;
+      return Math.floor(nowMs / step15) * step15;
+    }
+    if (dur === "1h") {
+      var step1h = 60 * 60000;
+      return Math.floor(nowMs / step1h) * step1h;
+    }
+    // 1D session starts strictly at 23:00 WIB = 16:00 UTC
+    var offset16h = 16 * 3600000;
+    var step1d = 24 * 3600000;
+    return Math.floor((nowMs - offset16h) / step1d) * step1d + offset16h;
+  }
 
-    var aTrig = analyzeCandles(sets[0]);
-    var aSess = analyzeCandles(sets[1]);
-    var aMacro = analyzeCandles(sets[2]);
+  function fmtWibHourLabel(stepIdx) {
+    // stepIdx = 1..23 hours after 23:00 WIB
+    var wibHour = (23 + stepIdx) % 24;
+    return String(wibHour).padStart(2, "0") + ":00 WIB";
+  }
 
-    var livePrice = (app.prices[sym] && app.prices[sym].price) || aSess.close;
-    var openPrice = aSess.open || livePrice;
-    var diffPct = openPrice > 0 ? ((livePrice - openPrice) / openPrice) * 100 : 0;
-    var distAbs = Math.abs(livePrice - openPrice);
-    var atrRef = aSess.atr14 || (openPrice * 0.002);
+  function formatAcuanShort(dur, step) {
+    if (!step) return "--";
+    if (dur === "1d") return "Close Jam " + fmtWibHourLabel(step);
+    return "Close Menit ke-" + step;
+  }
 
-    var upScore = 0;
-    var dnScore = 0;
+  async function compute100SessionAcuan(sym, dur, force) {
+    var nowMs = Date.now();
+    var sessionStartMs = getClosedBoundaryMs(dur, nowMs);
+    var cacheKey = sym + "_" + dur + "_" + sessionStartMs;
 
-    if (livePrice > openPrice) upScore += 32;
-    else if (livePrice < openPrice) dnScore += 32;
-
-    if (aTrig.close > aTrig.ema7 && aTrig.ema7 > aTrig.ema25) upScore += 26;
-    else if (aTrig.close < aTrig.ema7 && aTrig.ema7 < aTrig.ema25) dnScore += 26;
-    else if (aTrig.close > aTrig.ema25) upScore += 14;
-    else if (aTrig.close < aTrig.ema25) dnScore += 14;
-
-    if (aSess.close > aSess.ema25) upScore += 14; else dnScore += 14;
-    if (aSess.obv.bullish) upScore += 10; else dnScore += 10;
-
-    if (aMacro.close > aMacro.ema25) upScore += 18; else dnScore += 18;
-
-    var priceAboveOpen = livePrice > openPrice;
-    var bullishFlow = priceAboveOpen && aTrig.ema7 > aTrig.ema25 && aSess.close > aSess.ema25;
-    var bearishFlow = !priceAboveOpen && aTrig.ema7 < aTrig.ema25 && aSess.close < aSess.ema25;
-
-    var direction;
-    if (bullishFlow) {
-      direction = "NAIK";
-    } else if (bearishFlow) {
-      direction = "TURUN";
-    } else {
-      direction = upScore >= dnScore ? "NAIK" : "TURUN";
+    if (!force && app.udStatsCache[cacheKey]) {
+      return app.udStatsCache[cacheKey];
+    }
+    if (app.udStatsLoading[cacheKey]) {
+      return app.udStatsLoading[cacheKey];
     }
 
-    var confidence = Math.min(95, Math.max(48, Math.round(direction === "NAIK" ? upScore : dnScore)));
-    var warningNote = "";
+    var promise = (async function() {
+      var subInterval = dur === "1d" ? "1h" : "1m";
+      var subMs = dur === "1d" ? 3600000 : 60000;
+      var stepsPerSession = dur === "5m" ? 5 : (dur === "15m" ? 15 : (dur === "1h" ? 60 : 24));
+      var sessionMs = stepsPerSession * subMs;
+      var targetSessions = 100;
+      var totalCandlesNeeded = targetSessions * stepsPerSession;
 
-    if (aSess.adx14 < 20 && distAbs < atrRef * 0.35) {
-      confidence = Math.min(confidence, 55);
-      warningNote = "⏸️ Sideways (ADX " + aSess.adx14.toFixed(0) + " < 20) & jarak tipis ke Open — tahan dulu.";
+      // Only pull candles strictly BEFORE current active session starts (closed sessions only)
+      var histCandles = await fetchPaginatedKlines(sym, subInterval, totalCandlesNeeded, sessionStartMs - 1);
+
+      var byOpenTime = {};
+      for (var i = 0; i < histCandles.length; i++) {
+        byOpenTime[histCandles[i].openTime] = histCandles[i];
+      }
+
+      var validSessions = [];
+      for (var s = 1; s <= targetSessions + 5; s++) {
+        if (validSessions.length >= targetSessions) break;
+        var sStart = sessionStartMs - s * sessionMs;
+        var firstC = byOpenTime[sStart];
+        var lastC = byOpenTime[sStart + (stepsPerSession - 1) * subMs];
+        if (!firstC || !lastC) continue;
+
+        var sOpen = firstC.open;
+        var sClose = lastC.close;
+        if (sClose === sOpen) continue; // skip flat doji
+        var finalUp = sClose > sOpen;
+
+        var stepCloses = [];
+        var complete = true;
+        for (var k = 1; k < stepsPerSession; k++) {
+          var cStep = byOpenTime[sStart + (k - 1) * subMs];
+          if (!cStep) { complete = false; break; }
+          stepCloses.push({ step: k, close: cStep.close });
+        }
+        if (!complete) continue;
+
+        validSessions.push({
+          sStart: sStart,
+          sOpen: sOpen,
+          sClose: sClose,
+          finalUp: finalUp,
+          stepCloses: stepCloses
+        });
+      }
+
+      var bestStep = 1;
+      var bestWinrate = 0;
+      var bestHits = 0;
+      var totalEvaluated = validSessions.length;
+      var allStepsStats = [];
+
+      for (var step = 1; step < stepsPerSession; step++) {
+        var hits = 0;
+        var counted = 0;
+        for (var j = 0; j < validSessions.length; j++) {
+          var vs = validSessions[j];
+          var sc = vs.stepCloses[step - 1].close;
+          if (sc === vs.sOpen) continue;
+          counted++;
+          var stepUp = sc > vs.sOpen;
+          if (stepUp === vs.finalUp) hits++;
+        }
+        var wr = counted > 0 ? (hits / counted) * 100 : 0;
+        allStepsStats.push({ step: step, winrate: wr, hits: hits, counted: counted });
+        if (wr > bestWinrate || (wr === bestWinrate && step < bestStep)) {
+          bestWinrate = wr;
+          bestStep = step;
+          bestHits = hits;
+        }
+      }
+
+      // Also fetch current active session sub-candles so we can read exact Open & Acuan Close
+      var activeRaw = [];
+      try {
+        var rAct = await apiGet("/klines?symbol=" + sym + "&interval=" + subInterval + "&startTime=" + sessionStartMs + "&limit=" + (stepsPerSession + 2));
+        if (Array.isArray(rAct)) {
+          activeRaw = rAct.map(function(r) {
+            return {
+              openTime: Number(r[0]),
+              open: parseFloat(r[1]),
+              close: parseFloat(r[4]),
+              closeTime: Number(r[6])
+            };
+          });
+        }
+      } catch (e) {}
+
+      var resObj = {
+        sym: sym,
+        dur: dur,
+        sessionStartMs: sessionStartMs,
+        sessionEndMs: sessionStartMs + sessionMs,
+        subMs: subMs,
+        stepsPerSession: stepsPerSession,
+        totalEvaluated: totalEvaluated,
+        bestStep: bestStep,
+        bestWinrate: bestWinrate,
+        bestHits: bestHits,
+        acuanLabel: formatAcuanShort(dur, bestStep),
+        allStepsStats: allStepsStats,
+        activeCandles: activeRaw,
+        fetchedAt: Date.now()
+      };
+
+      app.udStatsCache[cacheKey] = resObj;
+      delete app.udStatsLoading[cacheKey];
+      return resObj;
+    })();
+
+    app.udStatsLoading[cacheKey] = promise;
+    return promise;
+  }
+
+  function evaluateActiveAcuanLock(stat) {
+    var nowMs = Date.now();
+    var livePrice = (app.prices[stat.sym] && app.prices[stat.sym].price) || 0;
+    var acuanCloseTimeMs = stat.sessionStartMs + stat.bestStep * stat.subMs;
+
+    var sessionOpen = livePrice;
+    var acuanClosePrice = null;
+    if (stat.activeCandles && stat.activeCandles.length > 0) {
+      sessionOpen = stat.activeCandles[0].open;
+      var targetOpenTime = stat.sessionStartMs + (stat.bestStep - 1) * stat.subMs;
+      for (var i = 0; i < stat.activeCandles.length; i++) {
+        if (stat.activeCandles[i].openTime === targetOpenTime && nowMs >= acuanCloseTimeMs) {
+          acuanClosePrice = stat.activeCandles[i].close;
+          break;
+        }
+      }
     }
 
-    var timing = getSessionRemainingInfo(dur);
-    if (timing.tooLate && ((direction === "NAIK" && aTrig.rsi6 > 78) || (direction === "TURUN" && aTrig.rsi6 < 22))) {
-      confidence = Math.min(confidence, 58);
-      warningNote = "⚠️ Sisa waktu sesi mepet & RSI ekstrem — tunggu sesi baru pukul " + timing.nextIdeal + ".";
-    } else if (timing.tooLate && confidence >= 80) {
-      confidence = 72;
-      warningNote = "🟡 Sisa waktu sesi tinggal sebentar — klik ideal berikutnya: " + timing.nextIdeal + ".";
-    }
+    var isReached = nowMs >= acuanCloseTimeMs;
+    var waitSec = Math.max(0, Math.ceil((acuanCloseTimeMs - nowMs) / 1000));
+    var remSessionSec = Math.max(0, Math.ceil((stat.sessionEndMs - nowMs) / 1000));
 
-    if (!warningNote && direction === "NAIK" && aTrig.rsi6 > 84) {
-      confidence = Math.min(confidence, 68);
-      warningNote = "🟡 Momentum NAIK kuat tapi RSI(6) tinggi (" + aTrig.rsi6.toFixed(0) + ") — siap-siap retest tipis.";
-    } else if (!warningNote && direction === "TURUN" && aTrig.rsi6 < 16) {
-      confidence = Math.min(confidence, 68);
-      warningNote = "🟡 Momentum TURUN kuat tapi RSI(6) rendah (" + aTrig.rsi6.toFixed(0) + ") — siap-siap pantulan tipis.";
+    var tier = stat.bestWinrate >= 68 ? "green" : (stat.bestWinrate >= 60 ? "amber" : "red");
+    var tierLabel = stat.bestWinrate >= 68 ? "KUAT (≥68%)" : (stat.bestWinrate >= 60 ? "CUKUP (60–67%)" : "SKIP (<60%)");
+
+    var direction = null;
+    if (isReached && acuanClosePrice !== null && sessionOpen > 0) {
+      if (acuanClosePrice > sessionOpen) direction = "NAIK";
+      else if (acuanClosePrice < sessionOpen) direction = "TURUN";
+      else direction = "FLAT";
     }
 
     return {
-      sym: sym,
-      dur: dur,
-      tfs: tfs,
+      isReached: isReached,
+      waitSec: waitSec,
+      remSessionSec: remSessionSec,
+      sessionOpen: sessionOpen,
+      acuanClosePrice: acuanClosePrice,
       livePrice: livePrice,
-      openPrice: openPrice,
-      diffPct: diffPct,
-      direction: direction,
-      confidence: confidence,
-      warningNote: warningNote,
-      adx14: aSess.adx14,
-      rsi6: aTrig.rsi6,
-      obvBull: aSess.obv.bullish
+      tier: tier,
+      tierLabel: tierLabel,
+      direction: direction
     };
   }
 
-  async function executeUpDownAnalysis() {
-    toast("Menganalisa arah searah multi-TF (Pure Momentum)...");
-    var list = [];
+  function fmtWaitClock(sec) {
+    var h = Math.floor(sec / 3600);
+    var m = Math.floor((sec % 3600) / 60);
+    var s = sec % 60;
+    if (h > 0) return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+    return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  }
+
+  async function refreshUdStatisticalEngine(force) {
+    if (app.mode !== "updown") return;
+
+    var tasks = [];
     if (app.udView === "per_time") {
-      list = await Promise.all(CORE_3.map(function(sym) {
-        return evaluatePureMomentumUpDown(sym, app.udDur);
-      }));
+      CORE_3.forEach(function(sym) {
+        tasks.push(compute100SessionAcuan(sym, app.udDur, force));
+      });
     } else {
-      list = await Promise.all(["5m", "15m", "1h", "1d"].map(function(d) {
-        return evaluatePureMomentumUpDown(app.udCoin, d);
-      }));
+      ["5m", "15m", "1h", "1d"].forEach(function(d) {
+        tasks.push(compute100SessionAcuan(app.udCoin, d, force));
+      });
     }
 
-    var panel = document.getElementById("signalOutputPanel");
-    if (!panel) return;
-    panel.classList.remove("hidden", "border-green", "border-amber", "border-red");
+    // Also update duration button pills for active coin (or BTC in per_time)
+    var refSym = app.udView === "per_time" ? "BTCUSDT" : app.udCoin;
+    ["5m", "15m", "1h", "1d"].forEach(function(d) {
+      compute100SessionAcuan(refSym, d, false).then(function(st) {
+        var pill = document.getElementById("durAcuan_" + d);
+        if (pill && st) {
+          pill.textContent = st.acuanLabel + " (" + st.bestWinrate.toFixed(0) + "%)";
+        }
+      });
+    });
 
-    var maxConf = Math.max.apply(null, list.map(function(x) { return x.confidence; }));
-    panel.classList.add(maxConf >= 80 ? "border-green" : (maxConf >= 60 ? "border-amber" : "border-red"));
+    await Promise.all(tasks);
+    renderUdAutoLockBoard();
+  }
 
-    var cards = list.map(function(item) {
-      var isUp = item.direction === "NAIK";
-      var tier = item.confidence >= 80 ? "green" : (item.confidence >= 60 ? "amber" : "red");
-      var tierTxt = item.confidence >= 80 ? "SINYAL KUAT" : (item.confidence >= 60 ? "SELEKTIF" : "TAHAN DULU");
-      var title = app.udView === "per_time"
-        ? item.sym.replace("USDT", "") + " • Sesi " + item.dur.toUpperCase()
-        : item.sym.replace("USDT", "") + " • Durasi " + item.dur.toUpperCase();
+  window.forceRefreshUdStats = async function() {
+    toast("Mengaudit ulang 100 sesi tertutup terakhir dari Binance...");
+    await refreshUdStatisticalEngine(true);
+    toast("Audit 100 sesi selesai & acuan diperbarui!");
+  };
+
+  function renderUdAutoLockBoard() {
+    var board = document.getElementById("udAutoLockBoard");
+    if (!board) return;
+    if (app.mode !== "updown") {
+      board.classList.add("hidden");
+      return;
+    }
+    board.classList.remove("hidden", "border-green", "border-amber", "border-red");
+
+    var nowMs = Date.now();
+    var items = [];
+    if (app.udView === "per_time") {
+      CORE_3.forEach(function(sym) {
+        var sMs = getClosedBoundaryMs(app.udDur, nowMs);
+        var st = app.udStatsCache[sym + "_" + app.udDur + "_" + sMs];
+        if (st) items.push(st);
+      });
+    } else {
+      ["5m", "15m", "1h", "1d"].forEach(function(d) {
+        var sMs = getClosedBoundaryMs(d, nowMs);
+        var st = app.udStatsCache[app.udCoin + "_" + d + "_" + sMs];
+        if (st) items.push(st);
+      });
+    }
+
+    if (items.length === 0) {
+      board.innerHTML = [
+        '<div class="sig-head">',
+        '  <div>',
+        '    <div class="sig-title">🎯 SCANNER STATISTIK 100 SESI CLOSED (AUTO-LOCK ACUAN)</div>',
+        '    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Menarik 100 sesi tertutup ke belakang dari server Binance untuk mencari menit/jam paling akurat...</div>',
+        '  </div>',
+        '</div>'
+      ].join("");
+      return;
+    }
+
+    var bestWr = Math.max.apply(null, items.map(function(x) { return x.bestWinrate; }));
+    board.classList.add(bestWr >= 68 ? "border-green" : (bestWr >= 60 ? "border-amber" : "border-red"));
+
+    var cardsHtml = items.map(function(st) {
+      var ev = evaluateActiveAcuanLock(st);
+      var durNames = { "5m": "Opsi 5 Menit", "15m": "Opsi 15 Menit", "1h": "Opsi 1 Jam", "1d": "Opsi 1 Hari (23:00 WIB)" };
+      var headTitle = app.udView === "per_time"
+        ? st.sym.replace("USDT", "") + " • " + durNames[st.dur]
+        : durNames[st.dur] + " (" + st.sym.replace("USDT", "") + ")";
+
+      var statusBlock = "";
+      if (st.bestWinrate < 60) {
+        statusBlock = [
+          '<div style="background:rgba(220,38,38,0.1);border:1px solid var(--red-border);border-radius:9px;padding:8px 10px;margin:6px 0;">',
+          '  <div style="font-size:14px;font-weight:900;color:var(--red);">⚠️ SKIP SESI INI (PASAR ACAK)</div>',
+          '  <div style="font-size:11px;color:#7f1d1d;margin-top:2px;">Winrate tertinggi hanya <strong>' + st.bestWinrate.toFixed(1) + '%</strong> (&lt; 60% standar minimal).</div>',
+          '</div>'
+        ].join("");
+      } else if (!ev.isReached) {
+        statusBlock = [
+          '<div style="background:#ffffff;border:1.5px dashed var(--amber-border);border-radius:9px;padding:8px 10px;margin:6px 0;">',
+          '  <div style="font-size:13px;font-weight:900;color:#b45309;">⏳ MENUNGGU ' + st.acuanLabel.toUpperCase() + '</div>',
+          '  <div class="mono" style="font-size:12px;font-weight:800;color:var(--text);margin-top:2px;">Hasil otomatis muncul dalam: <span style="color:var(--primary);">' + fmtWaitClock(ev.waitSec) + '</span></div>',
+          '</div>'
+        ].join("");
+      } else if (ev.acuanClosePrice === null) {
+        statusBlock = [
+          '<div style="background:#ffffff;border:1px solid var(--border-strong);border-radius:9px;padding:8px 10px;margin:6px 0;">',
+          '  <div style="font-size:13px;font-weight:900;color:var(--primary);">🔄 MEMBACA CLOSE ' + st.acuanLabel.toUpperCase() + '...</div>',
+          '</div>'
+        ].join("");
+      } else {
+        var isUp = ev.direction === "NAIK";
+        var isFlat = ev.direction === "FLAT";
+        var dirCol = isFlat ? "#b45309" : (isUp ? "var(--green)" : "var(--red)");
+        var dirTxt = isFlat ? "◆ SAMA DENGAN OPEN (SKIP)" : (isUp ? "▲ NAIK (CALL)" : "▼ TURUN (PUT)");
+        statusBlock = [
+          '<div style="background:#ffffff;border:2px solid ' + dirCol + ';border-radius:9px;padding:8px 10px;margin:6px 0;">',
+          '  <div style="font-size:10px;font-weight:800;color:var(--text-muted);">KEPUTUSAN OTOMATIS (TERKUNCI DARI ' + st.acuanLabel.toUpperCase() + ')</div>',
+          '  <div style="font-size:19px;font-weight:900;color:' + dirCol + ';margin-top:1px;">' + dirTxt + '</div>',
+          '</div>'
+        ].join("");
+      }
+
+      var diffOpenAcuan = (ev.acuanClosePrice !== null && ev.sessionOpen > 0)
+        ? ((ev.acuanClosePrice - ev.sessionOpen) / ev.sessionOpen) * 100
+        : 0;
 
       return [
-        '<div class="ud-item ' + tier + '">',
-        '  <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">',
-        '    <strong style="font-size:13px;">' + title + '</strong>',
-        '    <span class="conf-badge ' + tier + ' mono">' + item.confidence + '% • ' + tierTxt + '</span>',
+        '<div class="ud-item ' + ev.tier + '">',
+        '  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:4px;flex-wrap:wrap;">',
+        '    <div>',
+        '      <strong style="font-size:13px;">' + headTitle + '</strong>',
+        '      <div class="mono" style="font-size:11px;font-weight:800;color:var(--primary);margin-top:1px;">📌 Acuan: ' + st.acuanLabel + '</div>',
+        '    </div>',
+        '    <span class="conf-badge ' + ev.tier + ' mono">' + st.bestWinrate.toFixed(1) + '% • ' + ev.tierLabel + '</span>',
         '  </div>',
-        '  <div style="font-size:18px;font-weight:900;color:' + (isUp ? "var(--green)" : "var(--red)") + ';margin-bottom:6px;">',
-        '    ' + (isUp ? "▲ NAIK (CALL)" : "▼ TURUN (PUT)"),
+        statusBlock,
+        '  <div class="mono" style="font-size:11px;display:flex;flex-direction:column;gap:2px;margin-top:4px;">',
+        '    <div>Open Sesi: <strong>' + fmtP(ev.sessionOpen) + '</strong></div>',
+        '    <div>' + st.acuanLabel + ': <strong>' + (ev.acuanClosePrice !== null ? fmtP(ev.acuanClosePrice) + ' (' + (diffOpenAcuan >= 0 ? "+" : "") + diffOpenAcuan.toFixed(3) + '%)' : 'Belum Close') + '</strong></div>',
+        '    <div>Harga Live: <strong>' + fmtP(ev.livePrice) + '</strong> • Sampel: <strong>' + st.bestHits + '/' + st.totalEvaluated + ' sesi closed</strong></div>',
         '  </div>',
-        '  <div class="mono" style="font-size:11px;display:flex;flex-direction:column;gap:2px;">',
-        '    <div>Open Sesi: <strong>' + fmtP(item.openPrice) + '</strong></div>',
-        '    <div>Harga Live: <strong>' + fmtP(item.livePrice) + '</strong> (<span style="color:' + (item.diffPct >= 0 ? "var(--green)" : "var(--red)") + ';">' + (item.diffPct >= 0 ? "+" : "") + item.diffPct.toFixed(3) + '%</span>)</div>',
-        '    <div>3-TF: <strong>' + item.tfs.join(" + ").toUpperCase() + '</strong> | ADX: ' + item.adx14.toFixed(0) + ' | RSI6: ' + item.rsi6.toFixed(1) + ' | OBV: ' + (item.obvBull ? "Akumulasi" : "Distribusi") + '</div>',
-        '  </div>',
-        (item.warningNote ? '  <div style="margin-top:6px;font-size:10px;font-weight:800;color:#92400e;">' + item.warningNote + '</div>' : ''),
         '</div>'
       ].join("");
     }).join("");
 
-    panel.innerHTML = [
+    board.innerHTML = [
       '<div class="sig-head">',
       '  <div>',
-      '    <div class="sig-title">🎯 HASIL ANALISA NAIK / TURUN (PURE MOMENTUM FOLLOWER)</div>',
-      '    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Anti-Melawan Arus Aktif • 🟢 ≥80% Sinyal Kuat Searah • 🟡 60–79% Selektif • 🔴 &lt;60% Tahan Dulu</div>',
+      '    <div class="sig-title">🎯 HASIL OTOMATIS NAIK / TURUN — AUDIT 100 SESI CLOSED</div>',
+      '    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Otomatis muncul setelah waktu acuan close • 🟢 ≥68% Kuat • 🟡 60–67% Cukup • 🔴 &lt;60% Skip (Pasar Acak)</div>',
       '  </div>',
-      '  <button class="btn" onclick="hideSignalPanel()">✕ Tutup</button>',
       '</div>',
-      '<div class="ud-grid">' + cards + '</div>'
+      '<div class="ud-grid">' + cardsHtml + '</div>'
     ].join("");
   }
 
@@ -2152,8 +2375,7 @@
   };
 
   window.handleGaskanClick = function() {
-    if (app.mode === "updown") executeUpDownAnalysis();
-    else executeFuturesMuakUltimate();
+    executeFuturesMuakUltimate();
   };
 
   window.copyMuakText = function() {
@@ -2313,8 +2535,12 @@
       if (app.mode === "futures") {
         lines = app.overlayLines;
       } else if (arr.length > 0) {
-        var openSesi = arr[arr.length - 1].open;
-        lines = [{ label: "OPEN SESI", price: openSesi, color: "#0284c7", dash: [4, 3] }];
+        var sMsChart = getClosedBoundaryMs(item.tf, Date.now());
+        var stChart = app.udStatsCache[item.sym + "_" + item.tf + "_" + sMsChart];
+        var openSesi = (stChart && stChart.activeCandles && stChart.activeCandles.length > 0)
+          ? stChart.activeCandles[0].open
+          : arr[arr.length - 1].open;
+        lines = [{ label: item.tf === "1d" ? "OPEN 23:00 WIB" : "OPEN SESI", price: openSesi, color: "#0284c7", dash: [4, 3] }];
       }
       paintCanvas(cv, arr, lines, item.tf);
     });
@@ -2534,25 +2760,19 @@
     if (app.udDur === "5m") {
       var mod5 = min % 5;
       remSec = (4 - mod5) * 60 + (60 - sec);
-      idealTxt = "Klik Ideal 5m: Menit ke-1 s/d ke-2 sesi (Sisa 3-4 mnt)";
-      zoneTxt = mod5 <= 1 ? "🟢 ZONA IDEAL" : (mod5 === 2 ? "🟡 ZONA KETAT" : "🔴 SISA MEPET");
     } else if (app.udDur === "15m") {
       var mod15 = min % 15;
       remSec = (14 - mod15) * 60 + (60 - sec);
-      idealTxt = "Klik Ideal 15m: Menit ke-2 s/d ke-5 sesi (Sisa 10-13 mnt)";
-      zoneTxt = mod15 <= 5 ? "🟢 ZONA IDEAL" : (mod15 <= 9 ? "🟡 ZONA KETAT" : "🔴 SISA MEPET");
     } else if (app.udDur === "1h") {
       remSec = (59 - min) * 60 + (60 - sec);
-      idealTxt = "Klik Ideal 1H: Menit :05 s/d :20 tiap jam";
-      zoneTxt = min <= 20 ? "🟢 ZONA IDEAL" : (min <= 40 ? "🟡 ZONA KETAT" : "🔴 SISA MEPET");
     } else {
       var tgt = new Date(wib);
       tgt.setHours(23, 0, 0, 0);
       if (hr >= 23) tgt.setDate(tgt.getDate() + 1);
       remSec = Math.max(0, Math.floor((tgt - wib) / 1000));
-      idealTxt = "Klik Ideal 1D: Pukul 07:00 - 14:00 WIB (Reset 23:00 WIB)";
-      zoneTxt = (hr >= 7 && hr <= 15) ? "🟢 ZONA IDEAL" : "🟡 PANTAU TREN HARIAN";
     }
+    idealTxt = "Standar Minimal: ≥ 60% (60–67% Cukup • ≥ 68% Kuat • < 60% Skip)";
+    zoneTxt = "📊 AUDIT 100 SESI CLOSED";
 
     var cdEl = document.getElementById("udCountdown");
     if (cdEl) {
@@ -2573,18 +2793,29 @@
     var headEl = document.getElementById("udStripHeading");
     if (headEl) {
       headEl.textContent = app.udView === "per_time"
-        ? "3 KOIN SERENTAK (BTC • ETH • BNB) • SESI " + app.udDur.toUpperCase() + " (PURE MOMENTUM FOLLOWER)"
-        : app.udCoin + " • PANTAUAN 4 DURASI (5M • 15M • 1H • 1D)";
+        ? "3 KOIN SERENTAK (BTC • ETH • BNB) • SESI " + app.udDur.toUpperCase() + (app.udDur === "1d" ? " (RESET 23:00 WIB)" : "")
+        : app.udCoin + " • PANTAUAN 4 DURASI (5M • 15M • 1H • 1D 23:00 WIB)";
     }
 
     var rowEl = document.getElementById("udOpensRow");
     if (rowEl) {
       var tf = app.udDur;
+      var sMs = getClosedBoundaryMs(tf, Date.now());
       rowEl.innerHTML = CORE_3.map(function(sym) {
+        var st = app.udStatsCache[sym + "_" + tf + "_" + sMs];
         var arr = app.klines[sym + "_" + tf] || [];
-        var op = arr.length > 0 ? arr[arr.length - 1].open : ((app.prices[sym] && app.prices[sym].price) || 0);
-        return "<span>Open " + sym.replace("USDT", "") + ": <strong>" + fmtP(op) + "</strong></span>";
+        var op = (st && st.activeCandles && st.activeCandles.length > 0)
+          ? st.activeCandles[0].open
+          : (arr.length > 0 ? arr[arr.length - 1].open : ((app.prices[sym] && app.prices[sym].price) || 0));
+        var acTxt = st ? " [" + st.acuanLabel + " • " + st.bestWinrate.toFixed(0) + "%]" : "";
+        return "<span>Open " + sym.replace("USDT", "") + ": <strong>" + fmtP(op) + "</strong><span style='color:#fde047;font-size:11px;'>" + acTxt + "</span></span>";
       }).join("");
+    }
+
+    // Re-render auto-lock board every second for countdown & instant unlock when acuan minute/hour closes
+    renderUdAutoLockBoard();
+    if (sec === 1 || sec === 2) {
+      refreshUdStatisticalEngine(false);
     }
   }
 
@@ -2617,21 +2848,25 @@
 
     document.getElementById("udControlsBar").classList.toggle("hidden", mode !== "updown");
     document.getElementById("udSessionStrip").classList.toggle("hidden", mode !== "updown");
+    document.getElementById("udAutoLockBoard").classList.toggle("hidden", mode !== "updown");
     document.getElementById("idealWindowPill").classList.toggle("hidden", mode !== "updown");
 
     var showCoins = mode === "futures" || (mode === "updown" && app.udView === "per_coin");
     document.getElementById("coinSelectorBar").classList.toggle("hidden", !showCoins);
     document.getElementById("addCoinGroup").classList.toggle("hidden", mode !== "futures");
+    document.getElementById("btnGaskanMain").classList.toggle("hidden", mode !== "futures");
+    document.getElementById("btnRecalcStat").classList.toggle("hidden", mode !== "updown");
     document.getElementById("btnCekkan").classList.toggle("hidden", mode !== "futures");
     document.getElementById("levInfoBadge").classList.toggle("hidden", mode !== "futures");
 
     var gb = document.getElementById("gaskanBadge");
-    if (gb) gb.textContent = mode === "futures" ? "MUAK ULTIMATE" : (app.udView === "per_time" ? "3 KOIN SEARAH" : "4 DURASI");
+    if (gb) gb.textContent = "MUAK ULTIMATE";
 
     window.hideSignalPanel();
     renderCoinChips();
     updateTopTicker();
     refreshAllVisibleKlines();
+    if (mode === "updown") refreshUdStatisticalEngine(false);
   };
 
   window.selectUdDur = function(dur) {
@@ -2641,6 +2876,7 @@
     });
     updateUpDownBanner();
     refreshAllVisibleKlines();
+    refreshUdStatisticalEngine(false);
   };
 
   window.selectUdView = function(view) {
@@ -2650,11 +2886,9 @@
     document.getElementById("coinSelectorBar").classList.toggle("hidden", view === "per_time");
     document.getElementById("addCoinGroup").classList.add("hidden");
 
-    var gb = document.getElementById("gaskanBadge");
-    if (gb) gb.textContent = view === "per_time" ? "3 KOIN SEARAH" : "4 DURASI";
-
     renderCoinChips();
     refreshAllVisibleKlines();
+    refreshUdStatisticalEngine(false);
   };
 
   window.pickCoin = function(sym) {
@@ -2665,6 +2899,7 @@
     updateTopTicker();
     syncPrices1s();
     refreshAllVisibleKlines();
+    if (app.mode === "updown") refreshUdStatisticalEngine(false);
   };
 
   window.addCoinToWatchlist = function() {
@@ -2850,9 +3085,13 @@
 
     await syncPrices1s();
     await refreshAllVisibleKlines();
+    await refreshUdStatisticalEngine(false);
 
     setInterval(syncPrices1s, 1000);
     setInterval(refreshAllVisibleKlines, 10000);
+    setInterval(function() {
+      if (app.mode === "updown") refreshUdStatisticalEngine(false);
+    }, 15000);
 
     window.addEventListener("resize", renderAllCharts);
   });
@@ -2860,11 +3099,7 @@
 </script>
 <script>
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", function() {
-      navigator.serviceWorker.register("./sw.js", { scope: "./" }).then(function(reg) {
-        reg.update().catch(function() {});
-      }).catch(function() {});
-    });
+    navigator.serviceWorker.register("./sw.js").catch(function() {});
   }
 </script>
 </body>
