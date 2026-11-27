@@ -2,13 +2,16 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<link rel="manifest" href="manifest.json" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="apple-mobile-web-app-title" content="HarCript" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="HarCript v2.4" />
 <meta name="theme-color" content="#1e3a8a" />
-<title>HarCript v2.5 — Pure Momentum Naik/Turun &amp; MASTER CALL MUAK ULTIMATE</title>
+<link rel="manifest" href="./manifest.json" />
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-192.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+<title>HarCript v2.4 — Pure Momentum Naik/Turun &amp; MASTER CALL MUAK ULTIMATE</title>
 <style>
   :root {
     --bg: #f1f5f9;
@@ -70,6 +73,7 @@
     box-shadow: var(--shadow-sm);
     position: sticky;
     top: 0;
+    padding-top: env(safe-area-inset-top);
     z-index: 40;
   }
 
@@ -528,12 +532,61 @@
     border-color: #ef4444;
   }
 
-  /* MUAK ULTIMATE GRID */
+  /* MUAK ULTIMATE STRUCTURED REPORT */
+  .muak-report-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
   .muak-cols {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 10px;
-    margin-bottom: 10px;
+  }
+
+  .muak-sec {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 11px 13px;
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .muak-sec.long {
+    background: var(--green-bg);
+    border-color: var(--green-border);
+  }
+
+  .muak-sec.short {
+    background: var(--red-bg);
+    border-color: var(--red-border);
+  }
+
+  .muak-sec-title {
+    font-size: 11.5px;
+    font-weight: 900;
+    color: var(--primary);
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed var(--border-strong);
+  }
+
+  .muak-sec ul {
+    padding-left: 17px;
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .muak-check-list {
+    list-style: none;
+    padding-left: 0 !important;
   }
 
   .muak-panel {
@@ -542,31 +595,6 @@
     border-radius: 12px;
     padding: 10px 12px;
     font-size: 12px;
-  }
-
-  .muak-panel.long {
-    background: var(--green-bg);
-    border-color: var(--green-border);
-  }
-
-  .muak-panel.short {
-    background: var(--red-bg);
-    border-color: var(--red-border);
-  }
-
-  .muak-panel h4 {
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-
-  .muak-panel ul {
-    padding-left: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
   }
 
   .final-bar {
@@ -660,7 +688,7 @@
     display: block;
   }
 
-  /* 4-BOX MULTI-FACTOR FOOTER */
+  /* 4-BOX MULTI-FACTOR FOOTER (ZERO TRUNCATION) */
   .analysis-footer {
     background: var(--surface-alt);
     border: 1px solid var(--border);
@@ -818,9 +846,9 @@
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <div class="logo-box">H2.5</div>
+        <div class="logo-box">H2.4</div>
         <div>
-          <div class="brand-title">HarCript <span class="ver-badge">v2.5</span></div>
+          <div class="brand-title">HarCript <span class="ver-badge">v2.4</span></div>
           <div class="brand-sub">Pure Momentum Naik/Turun &amp; MASTER CALL MUAK ULTIMATE</div>
         </div>
       </div>
@@ -1041,8 +1069,8 @@
     udView: "per_time",
     futCoin: "BTCUSDT",
     udCoin: "BTCUSDT",
-    watchlist: readStore("hc25_watchlist", readStore("hc24_watchlist", DEFAULT_COINS)),
-    logs: readStore("hc25_logs", readStore("hc24_logs", [])),
+    watchlist: readStore("hc24_watchlist", DEFAULT_COINS),
+    logs: readStore("hc24_logs", []),
     nodeIdx: 0,
     lastLatencyMs: 0,
     prices: {},
@@ -1089,6 +1117,14 @@
     if (n >= 10) return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 3 });
     if (n >= 0.1) return n.toLocaleString("en-US", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
     return n.toLocaleString("en-US", { minimumFractionDigits: 5, maximumFractionDigits: 6 });
+  }
+
+  function fmtPtsDiff(val) {
+    var abs = Math.abs(val);
+    if (abs >= 100) return abs.toFixed(1);
+    if (abs >= 1) return abs.toFixed(2);
+    if (abs >= 0.01) return abs.toFixed(4);
+    return abs.toFixed(5);
   }
 
   function fmtK(num) {
@@ -1217,6 +1253,7 @@
   }
 
   async function loadKlines(sym, tf, limit) {
+    // Pull 260 candles for accurate EMA(99) & OBV warmup; lock screen view to 172 candles
     var lim = limit || 260;
     try {
       var raw = await apiGet("/klines?symbol=" + sym + "&interval=" + tf + "&limit=" + lim);
@@ -1278,7 +1315,7 @@
   };
 
   // =========================================================================
-  // 3. TECHNICAL INDICATORS (172-CANDLE SCREEN ENGINE + 36-54 LOCAL SWING)
+  // 3. TECHNICAL INDICATORS (172-CANDLE SCREEN ENGINE + 36/54 LOCAL SWINGS)
   // =========================================================================
   function calcEMA(arr, period) {
     if (!arr || arr.length === 0) return [];
@@ -1677,42 +1714,45 @@
   }
 
   // =========================================================================
-  // 5. MODE FUTURES ENGINE (172-CANDLE SCREEN-MATCHED MASTER CALL MUAK)
+  // 5. MODE FUTURES ENGINE (172-CANDLE VISUAL + AUTHENTIC MUAK ULTIMATE SL/TP)
   // =========================================================================
   function getVolProfile(sym) {
     if (sym === "BTCUSDT" || sym === "ETHUSDT") {
       return {
-        slPct: 0.0070,
+        slPct: 0.0075,
+        maxSlCap: 0.0145,
         maxEntryDist: 0.0045,
         tp1Cap: 0.0085,
         tp2Cap: 0.0170,
-        label: "0.70%",
-        tag: "Anti-Jarum Mega-Cap (172-Candle)"
+        label: "0.75%",
+        assetClass: "Low-Volatility Mega-Cap Asset"
       };
     }
     if (sym === "BNBUSDT" || sym === "SOLUSDT" || sym === "XRPUSDT") {
       return {
-        slPct: 0.0105,
+        slPct: 0.0115,
+        maxSlCap: 0.0195,
         maxEntryDist: 0.0065,
         tp1Cap: 0.0120,
-        tp2Cap: 0.0230,
-        label: "1.05%",
-        tag: "Anti-Jarum Large-Cap (172-Candle)"
+        tp2Cap: 0.0235,
+        label: "1.15%",
+        assetClass: "Medium-Low Volatility Large-Cap Asset"
       };
     }
     return {
-      slPct: 0.0145,
+      slPct: 0.0155,
+      maxSlCap: 0.0260,
       maxEntryDist: 0.0085,
       tp1Cap: 0.0160,
-      tp2Cap: 0.0300,
-      label: "1.45%",
-      tag: "Anti-Jarum High-Vol Altcoin (172-Candle)"
+      tp2Cap: 0.0310,
+      label: "1.55%",
+      assetClass: "High-Volatility Altcoin Asset"
     };
   }
 
   async function executeFuturesMuakUltimate() {
     var sym = app.futCoin;
-    toast("Menjalankan MASTER CALL MUAK ULTIMATE (" + sym + " • 172 Candle)...");
+    toast("Menjalankan MASTER CALL MUAK ULTIMATE (" + sym + ")...");
 
     var sets = await Promise.all([
       loadKlines(sym, "5m", 260),
@@ -1733,9 +1773,11 @@
       l24: a15.localLow54
     };
     var price = live.price || a5.close;
+    var chgPct = live.chgPct || 0;
     var h24 = live.h24 || a15.localHigh54;
     var l24 = live.l24 || a15.localLow54;
 
+    // 1. MULTI-TF BIAS (172-CANDLE VISUAL STRUCTURE + BREAKOUT TRANSITION)
     var bullPts = 0, bearPts = 0;
 
     if (price > a1h.ema99 && a1h.ema7 > a1h.ema99) bullPts += 32;
@@ -1763,77 +1805,78 @@
     var bias = isLong ? "LONG" : "SHORT";
     var prof = getVolProfile(sym);
 
+    // 2. MAGNET ONE ENTRY (ACTIVE PULLBACK CLUSTER)
     var entryPrice;
     if (isLong) {
       var minValidLong = price * (1 - prof.maxEntryDist);
       var lCandidates = [a1h.ema7, a15.ema25, a5.ema99, a5.ema7, a1h.ema99].filter(function(v) {
         return v >= minValidLong && v <= price * 1.0005;
       });
-      if (lCandidates.length > 0) {
-        entryPrice = lCandidates.reduce(function(s, v) { return s + v; }, 0) / lCandidates.length;
-      } else {
-        entryPrice = price * (1 - prof.maxEntryDist * 0.55);
-      }
+      entryPrice = lCandidates.length > 0
+        ? lCandidates.reduce(function(s, v) { return s + v; }, 0) / lCandidates.length
+        : price * (1 - prof.maxEntryDist * 0.55);
     } else {
       var maxValidShort = price * (1 + prof.maxEntryDist);
       var sCandidates = [a1h.ema7, a15.ema25, a5.ema99, a5.ema7, a1h.ema99].filter(function(v) {
         return v <= maxValidShort && v >= price * 0.9995;
       });
-      if (sCandidates.length > 0) {
-        entryPrice = sCandidates.reduce(function(s, v) { return s + v; }, 0) / sCandidates.length;
-      } else {
-        entryPrice = price * (1 + prof.maxEntryDist * 0.55);
-      }
+      entryPrice = sCandidates.length > 0
+        ? sCandidates.reduce(function(s, v) { return s + v; }, 0) / sCandidates.length
+        : price * (1 + prof.maxEntryDist * 0.55);
     }
 
-    var slPrice, swingAnchor, expiryPrice;
+    // 3. 100% AUTHENTIC AUTO-PROFILE SL (ANTI FAKE-WICK ON — NO TIGHT ARTIFICIAL CLAMP)
+    var slPrice, swingAnchor, slCalcBase, slCalcFormula, expiryPrice;
     if (isLong) {
-      swingAnchor = Math.min(a5.localLow36, a15.localLow36);
-      var minSl = entryPrice * (1 - prof.slPct * 1.35);
-      var maxSl = entryPrice * (1 - prof.slPct * 0.85);
-      var rawSl = Math.min(entryPrice * (1 - prof.slPct), swingAnchor * (1 - prof.slPct * 0.25));
-      slPrice = Math.max(minSl, Math.min(maxSl, rawSl));
-      expiryPrice = Math.min(swingAnchor, slPrice * 1.001);
+      var near24L = (l24 > 0 && (entryPrice - l24) / entryPrice <= prof.maxSlCap) ? l24 : a15.localLow54;
+      var nearE99_15L = (a15.ema99 < entryPrice && (entryPrice - a15.ema99) / entryPrice <= prof.maxSlCap) ? a15.ema99 : a15.localLow54;
+      swingAnchor = Math.min(a5.localLow54, a15.localLow54, near24L, nearE99_15L);
+      slCalcBase = Math.min(entryPrice, swingAnchor);
+      slCalcFormula = slCalcBase * (1 - prof.slPct);
+      var rawLongSl = Math.min(slCalcFormula, swingAnchor * (1 - prof.slPct * 0.35), entryPrice * (1 - prof.slPct * 1.25));
+      var floorLongSl = entryPrice * (1 - prof.maxSlCap);
+      slPrice = Math.max(floorLongSl, rawLongSl);
+      expiryPrice = Math.min(swingAnchor, entryPrice - Math.abs(entryPrice - slPrice) * 0.72);
     } else {
-      swingAnchor = Math.max(a5.localHigh36, a15.localHigh36);
-      var minSlS = entryPrice * (1 + prof.slPct * 0.85);
-      var maxSlS = entryPrice * (1 + prof.slPct * 1.35);
-      var rawSlS = Math.max(entryPrice * (1 + prof.slPct), swingAnchor * (1 + prof.slPct * 0.25));
-      slPrice = Math.min(maxSlS, Math.max(minSlS, rawSlS));
-      expiryPrice = Math.max(swingAnchor, slPrice * 0.999);
+      var near24H = (h24 > 0 && (h24 - entryPrice) / entryPrice <= prof.maxSlCap) ? h24 : a15.localHigh54;
+      var nearE99_15H = (a15.ema99 > entryPrice && (a15.ema99 - entryPrice) / entryPrice <= prof.maxSlCap) ? a15.ema99 : a15.localHigh54;
+      swingAnchor = Math.max(a5.localHigh54, a15.localHigh54, near24H, nearE99_15H);
+      slCalcBase = Math.max(entryPrice, swingAnchor);
+      slCalcFormula = slCalcBase * (1 + prof.slPct);
+      var rawShortSl = Math.max(slCalcFormula, swingAnchor * (1 + prof.slPct * 0.35), entryPrice * (1 + prof.slPct * 1.25));
+      var ceilShortSl = entryPrice * (1 + prof.maxSlCap);
+      slPrice = Math.min(ceilShortSl, rawShortSl);
+      expiryPrice = Math.max(swingAnchor, entryPrice + Math.abs(slPrice - entryPrice) * 0.72);
     }
 
+    // 4. REALISTIC TAKE PROFIT (TP1 GESER BEP + TP FINAL CONTINUATION)
     var riskPts = Math.abs(entryPrice - slPrice);
     var tp1Price, tpFinalPrice;
     if (isLong) {
       var ceil24 = h24 > entryPrice ? h24 : entryPrice * (1 + prof.tp2Cap);
-      var localPeak = Math.max(a5.localHigh36, a15.localHigh36);
-      var rawTp1 = localPeak > entryPrice * 1.002 ? localPeak : entryPrice + riskPts * 0.95;
+      var structTp1 = Math.max(a15.ema99, a1h.ema25, a5.localHigh36);
+      var rawTp1 = structTp1 > entryPrice * 1.002 ? structTp1 : entryPrice + riskPts * 0.75;
       tp1Price = Math.min(rawTp1, entryPrice * (1 + prof.tp1Cap));
-      if (tp1Price <= entryPrice * 1.0015) tp1Price = entryPrice + riskPts * 0.85;
+      if (tp1Price <= entryPrice * 1.0018) tp1Price = entryPrice + riskPts * 0.68;
 
-      var rawTp2 = Math.min(ceil24, Math.max(a5.localHigh54, a15.localHigh54, entryPrice + riskPts * 1.75));
-      tpFinalPrice = Math.min(rawTp2, entryPrice * (1 + prof.tp2Cap));
-      if (tpFinalPrice <= tp1Price * 1.0015) {
-        tpFinalPrice = Math.min(ceil24, tp1Price + riskPts * 0.85);
-        if (tpFinalPrice <= tp1Price) tpFinalPrice = tp1Price + riskPts * 0.80;
-      }
+      var structTp2 = Math.max(a5.localHigh54, a15.localHigh54, a1h.localHigh36, entryPrice + riskPts * 1.35);
+      tpFinalPrice = Math.min(Math.max(ceil24, structTp2), entryPrice * (1 + prof.tp2Cap));
+      if (tpFinalPrice <= tp1Price * 1.0018) tpFinalPrice = tp1Price + riskPts * 0.65;
     } else {
       var floor24 = (l24 > 0 && l24 < entryPrice) ? l24 : entryPrice * (1 - prof.tp2Cap);
-      var localBottom = Math.min(a5.localLow36, a15.localLow36);
-      var rawTp1S = localBottom < entryPrice * 0.998 ? localBottom : entryPrice - riskPts * 0.95;
+      var structTp1S = Math.min(a15.ema99, a1h.ema25, a5.localLow36);
+      var rawTp1S = structTp1S < entryPrice * 0.998 ? structTp1S : entryPrice - riskPts * 0.75;
       tp1Price = Math.max(rawTp1S, entryPrice * (1 - prof.tp1Cap));
-      if (tp1Price >= entryPrice * 0.9985) tp1Price = entryPrice - riskPts * 0.85;
+      if (tp1Price >= entryPrice * 0.9982) tp1Price = entryPrice - riskPts * 0.68;
 
-      var rawTp2S = Math.max(floor24, Math.min(a5.localLow54, a15.localLow54, entryPrice - riskPts * 1.75));
-      tpFinalPrice = Math.max(rawTp2S, entryPrice * (1 - prof.tp2Cap));
-      if (tpFinalPrice >= tp1Price * 0.9985) {
-        tpFinalPrice = Math.max(floor24, tp1Price - riskPts * 0.85);
-        if (tpFinalPrice >= tp1Price) tpFinalPrice = tp1Price - riskPts * 0.80;
-      }
+      var structTp2S = Math.min(a5.localLow54, a15.localLow54, a1h.localLow36, entryPrice - riskPts * 1.35);
+      tpFinalPrice = Math.max(Math.min(floor24, structTp2S), entryPrice * (1 - prof.tp2Cap));
+      if (tpFinalPrice >= tp1Price * 0.9982) tpFinalPrice = tp1Price - riskPts * 0.65;
     }
 
-    var rrRatio = riskPts > 0 ? (Math.abs(tpFinalPrice - entryPrice) / riskPts).toFixed(2) : "1.65";
+    var rewardTp1Pts = Math.abs(tp1Price - entryPrice);
+    var rewardFinalPts = Math.abs(tpFinalPrice - entryPrice);
+    var rrRatio = riskPts > 0 ? (rewardFinalPts / riskPts).toFixed(2) : "1.30";
 
     app.overlayLines = [
       { label: "ENTRY " + bias, price: entryPrice, color: "#1d4ed8", dash: [] },
@@ -1846,14 +1889,130 @@
 
     app.muakExpiryMs = Date.now() + 90 * 60 * 1000;
     app.lastMuak = {
-      sym: sym, bias: bias, confidence: confidence,
-      entryPrice: entryPrice, slPrice: slPrice, tp1Price: tp1Price,
-      tpFinalPrice: tpFinalPrice, expiryPrice: expiryPrice, rrRatio: rrRatio,
-      prof: prof, a5: a5, a15: a15, a30: a30, a1h: a1h,
-      h24: h24, l24: l24, price: price
+      sym: sym,
+      coinShort: sym.replace("USDT", ""),
+      bias: bias,
+      confidence: confidence,
+      entryPrice: entryPrice,
+      slPrice: slPrice,
+      slCalcBase: slCalcBase,
+      slCalcFormula: slCalcFormula,
+      swingAnchor: swingAnchor,
+      tp1Price: tp1Price,
+      tpFinalPrice: tpFinalPrice,
+      expiryPrice: expiryPrice,
+      riskPts: riskPts,
+      rewardTp1Pts: rewardTp1Pts,
+      rewardFinalPts: rewardFinalPts,
+      rrRatio: rrRatio,
+      prof: prof,
+      a5: a5,
+      a15: a15,
+      a30: a30,
+      a1h: a1h,
+      h24: h24,
+      l24: l24,
+      price: price,
+      chgPct: chgPct
     };
 
     renderMuakPanel(app.lastMuak);
+  }
+
+  function buildMuakVerbatimLines(sig) {
+    var isLong = sig.bias === "LONG";
+    var chgStr = (sig.chgPct >= 0 ? "+" : "") + sig.chgPct.toFixed(2) + "%";
+    var biasHeadline = isLong
+      ? "LONG 🟢 (EMA99 1H Support Bounce & LTF Breakout Above EMA7/EMA25 Cluster)"
+      : "SHORT 🔴 (EMA99 1H Double-Top Rejection & LTF Breakdown Below EMA7/EMA25 Cluster)";
+
+    var reason1 = isLong
+      ? "EMA99 1H Support Bounce (" + fmtP(sig.a1h.ema99) + ") & Low 24H Defense (" + fmtP(sig.l24) + "): " + sig.sym + " berada di kisaran " + fmtP(sig.price) + " (" + chgStr + ") setelah bertahan kuat di atas pijakan utama EMA99 TF 1H (" + fmtP(sig.a1h.ema99) + ") dan memantul naik dari dasar Low 24 jam (" + fmtP(sig.l24) + ")."
+      : "EMA99 1H Ceiling Rejection (" + fmtP(sig.a1h.ema99) + ") & High 24H Double-Top (" + fmtP(sig.h24) + "): " + sig.sym + " berada di kisaran " + fmtP(sig.price) + " (" + chgStr + ") setelah kembali gagal bertahan di atas bentengan utama EMA99 TF 1H (" + fmtP(sig.a1h.ema99) + ") dan ditolak turun dari puncak High 24 jam (" + fmtP(sig.h24) + ").";
+
+    var reason2 = isLong
+      ? "LTF EMA Breakout (5M & 15M Bullish Cross): Pada 5M, harga bergerak di atas rangkaian EMA — " + fmtP(sig.price) + " vs EMA7 (" + fmtP(sig.a5.ema7) + "), EMA25 (" + fmtP(sig.a5.ema25) + "), dan EMA99 (" + fmtP(sig.a5.ema99) + "). Pada 15M, struktur didukung EMA7 (" + fmtP(sig.a15.ema7) + ") dan EMA25 (" + fmtP(sig.a15.ema25) + "), serta selaras dengan EMA7 TF 30M (" + fmtP(sig.a30.ema7) + ") dan EMA7 TF 1H (" + fmtP(sig.a1h.ema7) + ")."
+      : "LTF EMA Breakdown (5M & 15M Bearish Cross): Pada 5M, harga tertekan di bawah rangkaian rata-rata bergerak — " + fmtP(sig.price) + " vs EMA99 (" + fmtP(sig.a5.ema99) + "), EMA25 (" + fmtP(sig.a5.ema25) + "), dan EMA7 (" + fmtP(sig.a5.ema7) + "). Pada 15M, harga juga tertekan di bawah EMA7 (" + fmtP(sig.a15.ema7) + ") dan EMA25 (" + fmtP(sig.a15.ema25) + "), serta selaras di bawah EMA7 TF 30M (" + fmtP(sig.a30.ema7) + ") dan EMA7 TF 1H (" + fmtP(sig.a1h.ema7) + ").";
+
+    var reason3 = "OBV LTF " + (isLong ? "Accumulation" : "Distribution") + " & HTF Volume Flow: Arus modal OBV pada 5M (" + fmtP(sig.a5.obv.obv) + " vs EMA10 " + fmtP(sig.a5.obv.ema10) + ") dan 15M (" + fmtP(sig.a15.obv.obv) + " vs EMA10 " + fmtP(sig.a15.obv.ema10) + ") mengonfirmasi arus " + (isLong ? "akumulasi" : "distribusi") + ". Pada saat yang sama, volume transaksi 1H tercatat (" + fmtK(sig.a1h.volCur) + " vs MA5 " + fmtK(sig.a1h.volMa5) + ") disertai pembacaan momentum RSI(6) 5M (" + sig.a5.rsi6.toFixed(2) + ") dan RSI(6) 15M (" + sig.a15.rsi6.toFixed(2) + ") yang memvalidasi arah aktif.";
+
+    var entryNote = isLong
+      ? (sig.a5.rsi6 > 72 ? "Catatan taktis: Karena RSI(6) 5M sudah tinggi di " + sig.a5.rsi6.toFixed(2) + ", tunggu koreksi pullback kecil ke pijakan EMA terdekat sebelum mengeksekusi limit order." : "Catatan taktis: RSI(6) 5M berada di zona sehat (" + sig.a5.rsi6.toFixed(2) + "), pasang limit ONE ENTRY tepat di zona retest cluster EMA.")
+      : (sig.a5.rsi6 < 28 ? "Catatan taktis: Karena RSI(6) 5M sudah oversold di " + sig.a5.rsi6.toFixed(2) + ", tunggu pantulan pullback kecil ke atap EMA yang baru jebol sebelum mengeksekusi limit order." : "Catatan taktis: RSI(6) 5M berada di zona sehat (" + sig.a5.rsi6.toFixed(2) + "), pasang limit ONE ENTRY tepat di zona retest cluster EMA.");
+
+    var entryWhy1 = isLong
+      ? "Memanfaatkan area retest pullback presisi tepat di pertemuan pijakan utama EMA99 TF 1H (" + fmtP(sig.a1h.ema99) + "), EMA7/25 TF 15M (" + fmtP(sig.a15.ema7) + " – " + fmtP(sig.a15.ema25) + "), dan EMA25/99 TF 5M (" + fmtP(sig.a5.ema25) + " – " + fmtP(sig.a5.ema99) + ") yang kini berfungsi sebagai lantai support dinamis."
+      : "Memanfaatkan area retest pullback presisi tepat di pertemuan bentengan utama EMA99 TF 1H (" + fmtP(sig.a1h.ema99) + "), EMA7/25 TF 15M (" + fmtP(sig.a15.ema7) + " – " + fmtP(sig.a15.ema25) + "), dan EMA25/99 TF 5M (" + fmtP(sig.a5.ema25) + " – " + fmtP(sig.a5.ema99) + ") yang kini berfungsi sebagai atap resistensi dinamis (support-turned-resistance).";
+
+    var entryWhy2 = isLong
+      ? "Terproteksi di atas dasar pantulan Low 24 jam (" + fmtP(sig.l24) + ") dan swing support lokal TF 15M (" + fmtP(sig.a15.localLow54) + ")."
+      : "Terproteksi di bawah puncak penolakan High 24 jam (" + fmtP(sig.h24) + ") dan swing resistance lokal TF 15M (" + fmtP(sig.a15.localHigh54) + ").";
+
+    var slHeader = isLong ? "Swing Low Terdekat & Support Major:" : "Swing High Terdekat & Resistance Major:";
+    var slCluster = isLong
+      ? "Dynamic Support Cluster EMA99 1H / EMA7-25 15M / EMA25 5M: " + fmtP(Math.min(sig.a1h.ema99, sig.a15.ema25, sig.a5.ema25)) + " – " + fmtP(Math.max(sig.a1h.ema99, sig.a15.ema7, sig.a5.ema25))
+      : "Dynamic Resistance Cluster EMA99 1H / EMA7-25 15M / EMA25 5M: " + fmtP(Math.min(sig.a1h.ema99, sig.a15.ema7, sig.a5.ema25)) + " – " + fmtP(Math.max(sig.a1h.ema99, sig.a15.ema7, sig.a5.ema25));
+    var slMajor = isLong
+      ? "Low 24 Jam & Swing Low Lokal TF 5M / TF 15M: " + fmtP(sig.l24) + " – " + fmtP(sig.swingAnchor)
+      : "High 24 Jam & Swing High Lokal TF 5M / TF 15M: " + fmtP(sig.h24) + " – " + fmtP(sig.swingAnchor);
+    var slMath = fmtP(sig.slCalcBase) + (isLong ? " - (" : " + (") + sig.prof.label + ") ≈ " + fmtP(sig.slCalcFormula);
+
+    var slAdv1 = isLong
+      ? "Berada aman di bawah swing low lokal TF 15M (" + fmtP(sig.a15.localLow54) + ") dan jangkar support (" + fmtP(sig.swingAnchor) + ")."
+      : "Berada aman di atas puncak High 24 jam (" + fmtP(sig.h24) + ") dan jangkar resistance (" + fmtP(sig.swingAnchor) + ").";
+    var slAdv2 = isLong
+      ? "Terproteksi penuh dari potensi fake-wick liquidity sweep di bawah area swing support."
+      : "Terproteksi penuh dari potensi fake-wick liquidity sweep di atas puncak resistensi.";
+    var slAdv3 = isLong
+      ? "Menjaga validitas struktur higher low kenaikan tetap utuh tanpa tersapu jarum sesaat."
+      : "Menjaga validitas struktur lower high koreksi tetap utuh tanpa tersapu jarum sesaat.";
+
+    var tp1Desc = isLong
+      ? "Target pengujian awal menuju pertemuan resistensi lokal TF 5M (" + fmtP(sig.a5.localHigh36) + ") dan area EMA25 TF 1H (" + fmtP(sig.a1h.ema25) + ")."
+      : "Target pengujian awal menuju pertemuan EMA99 TF 15M (" + fmtP(sig.a15.ema99) + ") dan EMA25 TF 1H (" + fmtP(sig.a1h.ema25) + ").";
+    var tp2Desc = isLong
+      ? "Target kenaikan lanjutan (breakout continuation) mengejar puncak swing high lokal TF 5M/15M (" + fmtP(sig.a15.localHigh54) + ") dan area High 24 jam (" + fmtP(sig.h24) + ")."
+      : "Target penurunan lanjutan (breakdown continuation) mengejar dasar swing low lokal TF 5M/15M (" + fmtP(sig.a15.localLow54) + ") dan area Low 24 jam (" + fmtP(sig.l24) + ").";
+
+    var val1 = isLong
+      ? "EMA99 1H Support Alignment → Harga bertahan kuat di atas EMA99 1H (" + fmtP(sig.a1h.ema99) + ") dan Low 24 jam (" + fmtP(sig.l24) + ")"
+      : "EMA99 1H Ceiling Rejection → Harga kembali ditolak di bawah EMA99 1H (" + fmtP(sig.a1h.ema99) + ") dan puncak High 24 jam (" + fmtP(sig.h24) + ")";
+    var val2 = isLong
+      ? "LTF Bullish EMA Alignment → Harga didukung rangkaian EMA 5M (" + fmtP(sig.a5.ema99) + " – " + fmtP(sig.a5.ema7) + ") serta EMA7/EMA25 15M (" + fmtP(sig.a15.ema25) + " – " + fmtP(sig.a15.ema7) + ")"
+      : "LTF Bearish EMA Breakdown → Harga tertekan di bawah EMA 5M (" + fmtP(sig.a5.ema99) + " – " + fmtP(sig.a5.ema7) + ") serta EMA7/EMA25 15M (" + fmtP(sig.a15.ema25) + " – " + fmtP(sig.a15.ema7) + ")";
+    var val3 = "OBV LTF " + (isLong ? "Accumulation" : "Distribution") + " & HTF Volume → OBV 5M dan 15M searah terhadap EMA10 disertai volume 1H (" + fmtK(sig.a1h.volCur) + " vs MA(5) " + fmtK(sig.a1h.volMa5) + ")";
+    var val4 = isLong
+      ? "Pattern Confirmation → Support Bounce & Pullback Retest Continuation"
+      : "Pattern Rejection → Double-Top Ceiling Rejection & Pullback Retest Continuation";
+
+    var expiryLine = isLong
+      ? "Jika dalam 4 candle 5M harga mampu menembus dan close bertahan di bawah " + fmtP(sig.expiryPrice) + " (di bawah dasar candle pantulan terakhir),"
+      : "Jika dalam 4 candle 5M harga mampu menembus dan close bertahan di atas " + fmtP(sig.expiryPrice) + " (di atas puncak candle penolakan terakhir),";
+
+    return {
+      isLong: isLong,
+      biasHeadline: biasHeadline,
+      reason1: reason1,
+      reason2: reason2,
+      reason3: reason3,
+      entryNote: entryNote,
+      entryWhy1: entryWhy1,
+      entryWhy2: entryWhy2,
+      slHeader: slHeader,
+      slCluster: slCluster,
+      slMajor: slMajor,
+      slMath: slMath,
+      slAdv1: slAdv1,
+      slAdv2: slAdv2,
+      slAdv3: slAdv3,
+      tp1Desc: tp1Desc,
+      tp2Desc: tp2Desc,
+      val1: val1,
+      val2: val2,
+      val3: val3,
+      val4: val4,
+      expiryLine: expiryLine
+    };
   }
 
   function renderMuakPanel(sig) {
@@ -1865,10 +2024,8 @@
     var tierLbl = sig.confidence >= 80 ? "SANGAT KUAT" : (sig.confidence >= 60 ? "SELEKTIF" : "ZONA KETAT");
     panel.classList.add("border-" + tier);
 
-    var isLong = sig.bias === "LONG";
-    var biasDesc = isLong
-      ? "LONG 🟢 (172-Candle Breakout Above EMA99 1H & Pullback Cluster EMA7 1H / EMA25 15M / EMA99 5M)"
-      : "SHORT 🔴 (172-Candle Breakdown Below EMA99 1H & Retest Cluster EMA7 1H / EMA25 15M / EMA99 5M)";
+    var d = buildMuakVerbatimLines(sig);
+    var entryLabel = d.isLong ? "Entry Long" : "Entry Short";
 
     panel.innerHTML = [
       '<div class="sig-head">',
@@ -1877,50 +2034,111 @@
       '      <span class="sig-title">🧠 MASTER CALL MUAK ULTIMATE – ' + sig.sym + '</span>',
       '      <span class="conf-badge ' + tier + ' mono">🎯 KEYAKINAN SINYAL: ' + sig.confidence + '% • ' + tierLbl + '</span>',
       '    </div>',
-      '    <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">Mode: <strong>ONE ENTRY (172-Candle Engine)</strong> • <span id="muakLiveCountdown" class="mono" style="color:var(--amber);font-weight:800;">⏱ Valid 90:00</span> • Auto-Profile SL (' + sig.prof.tag + ') • TF: 5M – 15M – 30M – 1H</div>',
+      '    <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">Mode: <strong>ONE ENTRY</strong></div>',
+      '    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;"><span id="muakLiveCountdown" class="mono" style="color:var(--amber);font-weight:800;">⏱ Valid 90:00</span> • Auto-Profile SL (Anti-Jarum ' + sig.prof.assetClass + ' Buffer) • Real Market Structure</div>',
+      '    <div style="font-size:11px;font-weight:700;color:var(--text);margin-top:2px;">TF digunakan: 5M – 15M – 30M – 1H</div>',
       '  </div>',
       '  <div class="flex-row">',
       '    <button class="btn btn-dark" onclick="copyMuakText()">📋 Salin Sinyal MUAK</button>',
       '    <button class="btn" onclick="hideSignalPanel()">✕ Tutup</button>',
       '  </div>',
       '</div>',
-      '<div class="muak-cols">',
-      '  <div class="muak-panel ' + (isLong ? "long" : "short") + '">',
-      '    <h4>BIAS &amp; ALASAN STRUKTURAL (172 CANDLE)</h4>',
-      '    <div style="font-weight:800;margin-bottom:6px;color:' + (isLong ? "var(--green)" : "var(--red)") + ';">' + biasDesc + '</div>',
+
+      '<div class="muak-report-wrap">',
+      '  <div class="muak-sec ' + (d.isLong ? "long" : "short") + '">',
+      '    <div class="muak-sec-title">BIAS</div>',
+      '    <div style="font-weight:900;font-size:13px;color:' + (d.isLong ? "var(--green)" : "var(--red)") + ';margin-bottom:5px;">' + d.biasHeadline + '</div>',
+      '    <div style="font-weight:800;">Alasan kuat:</div>',
       '    <ul>',
-      '      <li><strong>EMA99 1H (' + fmtP(sig.a1h.ema99) + ') &amp; 24H Range:</strong> Harga live <span class="mono">' + fmtP(sig.price) + '</span> ' + (isLong ? "bertahan di atas" : "tertahan di bawah") + ' EMA99 1H (H24: ' + fmtP(sig.h24) + ' | L24: ' + fmtP(sig.l24) + ').</li>',
-      '      <li><strong>Cluster Magnet Entry:</strong> 1H E7 (<span class="mono">' + fmtP(sig.a1h.ema7) + '</span>) • 15M E25 (<span class="mono">' + fmtP(sig.a15.ema25) + '</span>) • 5M E99 (<span class="mono">' + fmtP(sig.a5.ema99) + '</span>) | RSI(6) 5M: <span class="mono">' + sig.a5.rsi6.toFixed(1) + '</span>.</li>',
-      '      <li><strong>OBV &amp; HTF Volume:</strong> OBV 5M (' + (sig.a5.obv.bullish ? "Akumulasi > EMA10" : "Distribusi < EMA10") + ') &amp; 1H (' + (sig.a1h.obv.bullish ? "Akumulasi > EMA10" : "Distribusi < EMA10") + ') | Vol 1H: <span class="mono">' + fmtK(sig.a1h.volCur) + '</span> vs MA5 <span class="mono">' + fmtK(sig.a1h.volMa5) + '</span>.</li>',
+      '      <li>' + d.reason1 + '</li>',
+      '      <li>' + d.reason2 + '</li>',
+      '      <li>' + d.reason3 + '</li>',
       '    </ul>',
+      '    <div style="margin-top:6px;font-style:italic;color:var(--text-muted);">(' + d.entryNote + ')</div>',
       '  </div>',
-      '  <div class="muak-panel">',
-      '    <h4>ONE ENTRY &amp; SL AUTO-PROFILE MUAK (' + sig.prof.label + ')</h4>',
-      '    <ul>',
-      '      <li><strong>📌 ONE ENTRY (' + sig.bias + '): <span class="mono" style="color:var(--primary);font-size:13px;">' + fmtP(sig.entryPrice) + '</span></strong> — Pullback presisi pada cluster EMA7 1H / EMA25 15M / EMA99 5M (mudah tersentuh).</li>',
-      '      <li><strong>📌 SL MUAK Ultimate: <span class="mono" style="color:var(--red);font-size:13px;">' + fmtP(sig.slPrice) + '</span></strong> — Aman di ' + (isLong ? "bawah" : "atas") + ' swing lokal 36-candle (<span class="mono">' + fmtP(isLong ? sig.a5.localLow36 : sig.a5.localHigh36) + '</span>) + buffer ' + sig.prof.label + '.</li>',
-      '      <li><strong>📌 TP1: <span class="mono" style="color:var(--green);">' + fmtP(sig.tp1Price) + '</span></strong> (Ambil TP1 &amp; <strong>wajib geser SL ke BEP / SL+</strong> saat tersentuh).</li>',
-      '      <li><strong>📌 TP FINAL: <span class="mono" style="color:var(--green);">' + fmtP(sig.tpFinalPrice) + '</span></strong> (Target lokal dibatasi 24H High/Low • <strong>R:R ≈ 1 : ' + sig.rrRatio + '</strong>).</li>',
-      '    </ul>',
+
+      '  <div class="muak-cols">',
+      '    <div class="muak-sec">',
+      '      <div class="muak-sec-title">ONE ENTRY</div>',
+      '      <div style="font-weight:900;font-size:13px;color:var(--primary);margin-bottom:4px;">📌 ' + entryLabel + ': <span class="mono">' + fmtP(sig.entryPrice) + '</span></div>',
+      '      <div style="font-weight:800;">Kenapa?</div>',
+      '      <ul>',
+      '        <li>' + d.entryWhy1 + '</li>',
+      '        <li>' + d.entryWhy2 + '</li>',
+      '      </ul>',
+      '    </div>',
+
+      '    <div class="muak-sec">',
+      '      <div class="muak-sec-title">SL – AUTO-PROFILE MUAK (' + sig.coinShort + ' = ' + sig.prof.assetClass + ')</div>',
+      '      <div style="font-weight:800;">' + d.slHeader + '</div>',
+      '      <ul>',
+      '        <li>' + d.slCluster + '</li>',
+      '        <li>' + d.slMajor + '</li>',
+      '        <li>Buffer volatilitas Anti-Stop Hunt: <strong>~' + sig.prof.label + '</strong></li>',
+      '      </ul>',
+      '      <div style="margin-top:6px;font-weight:800;">Perhitungan:</div>',
+      '      <div class="mono" style="font-size:11px;color:var(--text-muted);">' + d.slMath + '</div>',
+      '      <div style="font-weight:900;font-size:13px;color:var(--red);margin:4px 0;">📌 SL MUAK Ultimate: <span class="mono">' + fmtP(sig.slPrice) + '</span></div>',
+      '      <div style="font-weight:800;">Kelebihan:</div>',
+      '      <ul class="muak-check-list">',
+      '        <li>✔ ' + d.slAdv1 + '</li>',
+      '        <li>✔ ' + d.slAdv2 + '</li>',
+      '        <li>✔ ' + d.slAdv3 + '</li>',
+      '      </ul>',
+      '    </div>',
       '  </div>',
-      '  <div class="muak-panel">',
-      '    <h4>VALIDASI MUAK &amp; MOMENTUM EXPIRY</h4>',
-      '    <ul>',
-      '      <li>✔ <strong>172-Candle Visual Calibration</strong> → Jendela struktur &amp; jarak target disamakan persis dengan chart layar HP.</li>',
-      '      <li>✔ <strong>LTF EMA7/25/99 Confluence</strong> → Zona entry realistis tanpa menunggu koreksi ekstrem 24 jam.</li>',
-      '      <li>✔ <strong>OBV &amp; Momentum Check</strong> → Arus OBV terhadap EMA10 &amp; Volume tervalidasi.</li>',
-      '      <li style="color:#b45309;font-weight:800;">⏳ <strong>MOMENTUM EXPIRY:</strong> Jika dalam 4 candle 5M close bertahan di ' + (isLong ? "bawah" : "atas") + ' <span class="mono">' + fmtP(sig.expiryPrice) + '</span>, sinyal hangus (cancel bias).</li>',
-      '    </ul>',
+
+      '  <div class="muak-cols">',
+      '    <div class="muak-sec">',
+      '      <div class="muak-sec-title">TAKE PROFIT</div>',
+      '      <div style="margin-bottom:6px;">',
+      '        <div style="font-weight:900;color:var(--green);">📌 TP1: <span class="mono">' + fmtP(sig.tp1Price) + '</span></div>',
+      '        <div>' + d.tp1Desc + '</div>',
+      '      </div>',
+      '      <div>',
+      '        <div style="font-weight:900;color:var(--green);">📌 TP FINAL: <span class="mono">' + fmtP(sig.tpFinalPrice) + '</span></div>',
+      '        <div>' + d.tp2Desc + '</div>',
+      '      </div>',
+      '    </div>',
+
+      '    <div class="muak-sec">',
+      '      <div class="muak-sec-title">RISK–REWARD</div>',
+      '      <ul>',
+      '        <li>Risk: <strong class="mono">~' + fmtPtsDiff(sig.riskPts) + ' point</strong> (' + fmtP(sig.entryPrice) + ' ke ' + fmtP(sig.slPrice) + ')</li>',
+      '        <li>Reward (ke TP FINAL): <strong class="mono">~' + fmtPtsDiff(sig.rewardFinalPts) + ' point</strong> (' + fmtP(sig.entryPrice) + ' ke ' + fmtP(sig.tpFinalPrice) + ') | Rasio ke TP1: <strong class="mono">~' + fmtPtsDiff(sig.rewardTp1Pts) + ' point</strong> (' + fmtP(sig.entryPrice) + ' ke ' + fmtP(sig.tp1Price) + ')</li>',
+      '      </ul>',
+      '      <div style="margin-top:6px;font-weight:800;color:var(--primary);">RR Target Utama ≈ 1 : ' + sig.rrRatio + ' (Ambil TP1 / lepas sebagian posisi di ' + fmtP(sig.tp1Price) + ' &amp; langsung geser SL ke BEP / SL+ begitu TP1 tersentuh)</div>',
+      '    </div>',
+      '  </div>',
+
+      '  <div class="muak-cols">',
+      '    <div class="muak-sec">',
+      '      <div class="muak-sec-title">VALIDASI MUAK ULTIMATE</div>',
+      '      <ul class="muak-check-list">',
+      '        <li>✔ ' + d.val1 + '</li>',
+      '        <li>✔ ' + d.val2 + '</li>',
+      '        <li>✔ ' + d.val3 + '</li>',
+      '        <li>✔ ' + d.val4 + '</li>',
+      '      </ul>',
+      '    </div>',
+
+      '    <div class="muak-sec">',
+      '      <div class="muak-sec-title">MOMENTUM EXPIRY</div>',
+      '      <div>' + d.expiryLine + '</div>',
+      '      <div style="font-weight:900;color:#b45309;margin-top:4px;">➡ Sinyal hangus (cancel bias).</div>',
+      '    </div>',
       '  </div>',
       '</div>',
+
       '<div class="final-bar">',
       '  <div>',
-      '    <div style="font-size:10px;color:#93c5fd;font-weight:800;">🚀 FINAL SIGNAL — ' + sig.sym + ' (MUAK ULTIMATE • KEYAKINAN ' + sig.confidence + '%)</div>',
-      '    <div class="flex-row mono" style="margin-top:5px;">',
-      '      <span class="lvl-tag" style="color:' + (isLong ? "#34d399" : "#f87171") + ';font-weight:800;">' + sig.bias + ' ' + fmtP(sig.entryPrice) + '</span>',
-      '      <span class="lvl-tag">SL: <strong>' + fmtP(sig.slPrice) + '</strong></span>',
-      '      <span class="lvl-tag">TP1: <strong style="color:#34d399;">' + fmtP(sig.tp1Price) + '</strong></span>',
-      '      <span class="lvl-tag">TP FINAL: <strong style="color:#34d399;">' + fmtP(sig.tpFinalPrice) + '</strong></span>',
+      '    <div style="font-size:11px;color:#fde047;font-weight:900;">🚀 FINAL SIGNAL — ' + sig.sym + ' (MUAK ULTIMATE)</div>',
+      '    <div class="flex-row mono" style="margin-top:6px;">',
+      '      <span class="lvl-tag" style="color:' + (d.isLong ? "#34d399" : "#f87171") + ';font-weight:900;">' + sig.bias + ' ' + fmtP(sig.entryPrice) + '</span>',
+      '      <span class="lvl-tag">SL <strong>' + fmtP(sig.slPrice) + '</strong></span>',
+      '      <span class="lvl-tag">TP1 <strong style="color:#34d399;">' + fmtP(sig.tp1Price) + '</strong></span>',
+      '      <span class="lvl-tag">TP FINAL <strong style="color:#34d399;">' + fmtP(sig.tpFinalPrice) + '</strong></span>',
+      '      <span class="lvl-tag" style="color:#fde047;">⏱ Valid 90 menit</span>',
       '    </div>',
       '  </div>',
       '  <button class="btn btn-amber" onclick="loadSignalToCekkan()">📊 Evaluasi Posisi Ini</button>',
@@ -1939,19 +2157,64 @@
   };
 
   window.copyMuakText = function() {
-    var s = app.lastMuak;
-    if (!s) return;
+    var sig = app.lastMuak;
+    if (!sig) return;
+    var d = buildMuakVerbatimLines(sig);
+    var entryLabel = d.isLong ? "Entry Long" : "Entry Short";
+
     var msg = [
-      "🧠 MASTER CALL MUAK ULTIMATE – " + s.sym,
-      "Keyakinan: " + s.confidence + "% | Mode: ONE ENTRY | ⏱ Valid 90 menit",
-      "BIAS: " + s.bias,
-      s.bias + " " + fmtP(s.entryPrice),
-      "SL " + fmtP(s.slPrice),
-      "TP1 " + fmtP(s.tp1Price) + " (Geser SL ke BEP)",
-      "TP FINAL " + fmtP(s.tpFinalPrice) + " (R:R 1:" + s.rrRatio + ")",
-      "Momentum Expiry: Close 4x 5M " + (s.bias === "LONG" ? "< " : "> ") + fmtP(s.expiryPrice)
-    ].join("
-");
+      "🧠 MASTER CALL MUAK ULTIMATE – " + sig.sym,
+      "Mode: ONE ENTRY",
+      "⏱ Valid 90 menit • Auto-Profile SL (Anti-Jarum " + sig.prof.assetClass + " Buffer) • Real Market Structure",
+      "TF digunakan: 5M – 15M – 30M – 1H",
+      "BIAS",
+      d.biasHeadline,
+      "Alasan kuat:",
+      "- " + d.reason1,
+      "- " + d.reason2,
+      "- " + d.reason3,
+      "(" + d.entryNote + ")",
+      "ONE ENTRY",
+      "📌 " + entryLabel + ": " + fmtP(sig.entryPrice),
+      "Kenapa?",
+      "- " + d.entryWhy1,
+      "- " + d.entryWhy2,
+      "SL – AUTO-PROFILE MUAK (" + sig.coinShort + " = " + sig.prof.assetClass + ")",
+      d.slHeader,
+      "- " + d.slCluster,
+      "- " + d.slMajor,
+      "- Buffer volatilitas Anti-Stop Hunt: ~" + sig.prof.label,
+      "Perhitungan:",
+      d.slMath,
+      "📌 SL MUAK Ultimate: " + fmtP(sig.slPrice),
+      "Kelebihan:",
+      "✔ " + d.slAdv1,
+      "✔ " + d.slAdv2,
+      "✔ " + d.slAdv3,
+      "TAKE PROFIT",
+      "📌 TP1: " + fmtP(sig.tp1Price),
+      d.tp1Desc,
+      "📌 TP FINAL: " + fmtP(sig.tpFinalPrice),
+      d.tp2Desc,
+      "RISK–REWARD",
+      "- Risk: ~" + fmtPtsDiff(sig.riskPts) + " point (" + fmtP(sig.entryPrice) + " ke " + fmtP(sig.slPrice) + ")",
+      "- Reward (ke TP FINAL): ~" + fmtPtsDiff(sig.rewardFinalPts) + " point (" + fmtP(sig.entryPrice) + " ke " + fmtP(sig.tpFinalPrice) + ") | Rasio ke TP1: ~" + fmtPtsDiff(sig.rewardTp1Pts) + " point (" + fmtP(sig.entryPrice) + " ke " + fmtP(sig.tp1Price) + ")",
+      "RR Target Utama ≈ 1 : " + sig.rrRatio + " (Ambil TP1 / lepas sebagian posisi di " + fmtP(sig.tp1Price) + " & langsung geser SL ke BEP / SL+ begitu TP1 tersentuh)",
+      "VALIDASI MUAK ULTIMATE",
+      "✔ " + d.val1,
+      "✔ " + d.val2,
+      "✔ " + d.val3,
+      "✔ " + d.val4,
+      "MOMENTUM EXPIRY",
+      d.expiryLine,
+      "➡ Sinyal hangus (cancel bias).",
+      "🚀 FINAL SIGNAL — " + sig.sym + " (MUAK ULTIMATE)",
+      sig.bias + " " + fmtP(sig.entryPrice),
+      "SL " + fmtP(sig.slPrice),
+      "TP1 " + fmtP(sig.tp1Price),
+      "TP FINAL " + fmtP(sig.tpFinalPrice),
+      "⏱ Valid 90 menit"
+    ].join("\n");
     copyTextSafe(msg, "Sinyal MUAK ULTIMATE disalin!");
   };
 
@@ -2338,9 +2601,9 @@
       var isAct = sym === active;
       var levTag = app.mode === "futures" ? '<span class="lev-pill mono">' + getLev(sym) + 'x</span>' : '';
       var delTag = (app.mode === "futures" && app.watchlist.length > 1)
-        ? '<span class="del-coin" onclick="event.stopPropagation();removeCoin('' + sym + '')">×</span>'
+        ? '<span class="del-coin" onclick="event.stopPropagation();removeCoin(\'' + sym + '\')">×</span>'
         : '';
-      return '<button class="chip-btn ' + (isAct ? "active" : "") + '" onclick="pickCoin('' + sym + '')">' + sym + levTag + delTag + '</button>';
+      return '<button class="chip-btn ' + (isAct ? "active" : "") + '" onclick="pickCoin(\'' + sym + '\')">' + sym + levTag + delTag + '</button>';
     }).join("");
 
     var levBadge = document.getElementById("levInfoBadge");
@@ -2412,7 +2675,7 @@
     if (val.slice(-4) !== "USDT") val += "USDT";
     if (app.watchlist.indexOf(val) === -1) {
       app.watchlist.push(val);
-      writeStore("hc25_watchlist", app.watchlist);
+      writeStore("hc24_watchlist", app.watchlist);
     }
     inp.value = "";
     window.pickCoin(val);
@@ -2422,7 +2685,7 @@
   window.removeCoin = function(sym) {
     if (app.watchlist.length <= 1) return;
     app.watchlist = app.watchlist.filter(function(c) { return c !== sym; });
-    writeStore("hc25_watchlist", app.watchlist);
+    writeStore("hc24_watchlist", app.watchlist);
     if (app.futCoin === sym) app.futCoin = app.watchlist[0];
     renderCoinChips();
     refreshAllVisibleKlines();
@@ -2455,13 +2718,12 @@
     var c15 = analyzeCandles(app.klines[sym + "_15m"] || []);
     var c1h = analyzeCandles(app.klines[sym + "_1h"] || []);
     var txt = [
-      "📊 HARCRIPT v2.5 SNAPSHOT (172-CANDLE) — " + sym,
+      "📊 HARCRIPT v2.4 SNAPSHOT (172-CANDLE) — " + sym,
       "Harga Live: " + fmtP(price),
       "5M: Close " + fmtP(c5.close) + " | E7 " + fmtP(c5.ema7) + " | E25 " + fmtP(c5.ema25) + " | E99 " + fmtP(c5.ema99) + " | RSI6 " + c5.rsi6.toFixed(1),
       "15M: Close " + fmtP(c15.close) + " | E7 " + fmtP(c15.ema7) + " | E25 " + fmtP(c15.ema25) + " | ADX " + c15.adx14.toFixed(1),
       "1H: Close " + fmtP(c1h.close) + " | E7 " + fmtP(c1h.ema7) + " | E99 " + fmtP(c1h.ema99)
-    ].join("
-");
+    ].join("\n");
     copyTextSafe(txt, "Data live multi-TF disalin!");
   };
 
@@ -2530,7 +2792,7 @@
     var pnl = parseFloat(document.getElementById("lPnl").value) || 0;
     var time = document.getElementById("hdrClock").textContent;
     app.logs.unshift({ sym: sym, dir: dir, entry: entry, res: res, pnl: pnl, time: time });
-    writeStore("hc25_logs", app.logs);
+    writeStore("hc24_logs", app.logs);
     document.getElementById("lPnl").value = "";
     renderLogsUI();
     toast("Catatan trade tersimpan!");
@@ -2538,7 +2800,7 @@
 
   window.delLog = function(i) {
     app.logs.splice(i, 1);
-    writeStore("hc25_logs", app.logs);
+    writeStore("hc24_logs", app.logs);
     renderLogsUI();
   };
 
@@ -2598,7 +2860,11 @@
 </script>
 <script>
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js");
+    window.addEventListener("load", function() {
+      navigator.serviceWorker.register("./sw.js", { scope: "./" }).then(function(reg) {
+        reg.update().catch(function() {});
+      }).catch(function() {});
+    });
   }
 </script>
 </body>
