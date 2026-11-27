@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="id">
-<link rel="manifest" href="manifest.json" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>HarCript v2.4 — Pure Momentum Naik/Turun &amp; MASTER CALL MUAK ULTIMATE</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="HarCript" />
+<meta name="theme-color" content="#1e3a8a" />
+<title>HarCript v2.5 — Pure Momentum Naik/Turun &amp; MASTER CALL MUAK ULTIMATE</title>
 <style>
   :root {
     --bg: #f1f5f9;
@@ -657,7 +660,7 @@
     display: block;
   }
 
-  /* 4-BOX MULTI-FACTOR FOOTER (ZERO TRUNCATION) */
+  /* 4-BOX MULTI-FACTOR FOOTER */
   .analysis-footer {
     background: var(--surface-alt);
     border: 1px solid var(--border);
@@ -815,9 +818,9 @@
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <div class="logo-box">H2.4</div>
+        <div class="logo-box">H2.5</div>
         <div>
-          <div class="brand-title">HarCript <span class="ver-badge">v2.4</span></div>
+          <div class="brand-title">HarCript <span class="ver-badge">v2.5</span></div>
           <div class="brand-sub">Pure Momentum Naik/Turun &amp; MASTER CALL MUAK ULTIMATE</div>
         </div>
       </div>
@@ -1038,8 +1041,8 @@
     udView: "per_time",
     futCoin: "BTCUSDT",
     udCoin: "BTCUSDT",
-    watchlist: readStore("hc24_watchlist", DEFAULT_COINS),
-    logs: readStore("hc24_logs", []),
+    watchlist: readStore("hc25_watchlist", readStore("hc24_watchlist", DEFAULT_COINS)),
+    logs: readStore("hc25_logs", readStore("hc24_logs", [])),
     nodeIdx: 0,
     lastLatencyMs: 0,
     prices: {},
@@ -1214,7 +1217,6 @@
   }
 
   async function loadKlines(sym, tf, limit) {
-    // Pull up to 260 candles for accurate EMA(99) warmup; visual screen window = 172 candles
     var lim = limit || 260;
     try {
       var raw = await apiGet("/klines?symbol=" + sym + "&interval=" + tf + "&limit=" + lim);
@@ -1385,7 +1387,6 @@
       };
     }
 
-    // Warmup indicators on full history, then lock structural screen view to exact 172 candles
     var closes = candles.map(function(c) { return c.close; });
     var ema7Arr = calcEMA(closes, 7);
     var ema25Arr = calcEMA(closes, 25);
@@ -1735,7 +1736,6 @@
     var h24 = live.h24 || a15.localHigh54;
     var l24 = live.l24 || a15.localLow54;
 
-    // 1. MULTI-TF BIAS INCLUDING BREAKOUT TRANSITION (EMA7 > EMA99 > EMA25)
     var bullPts = 0, bearPts = 0;
 
     if (price > a1h.ema99 && a1h.ema7 > a1h.ema99) bullPts += 32;
@@ -1763,7 +1763,6 @@
     var bias = isLong ? "LONG" : "SHORT";
     var prof = getVolProfile(sym);
 
-    // 2. MAGNET ONE ENTRY DEKAT (EMA7 1H / EMA25 15M / EMA99 5M / EMA7 5M)
     var entryPrice;
     if (isLong) {
       var minValidLong = price * (1 - prof.maxEntryDist);
@@ -1787,7 +1786,6 @@
       }
     }
 
-    // 3. SL MUAK ULTIMATE (LOCAL 36-CANDLE SWING + ANTI-WICK BUFFER)
     var slPrice, swingAnchor, expiryPrice;
     if (isLong) {
       swingAnchor = Math.min(a5.localLow36, a15.localLow36);
@@ -1805,7 +1803,6 @@
       expiryPrice = Math.max(swingAnchor, slPrice * 0.999);
     }
 
-    // 4. TP1 (GESER BEP) & TP FINAL REALISTIS (DIBATASI 24H HIGH/LOW & LOKAL 54 CANDLE)
     var riskPts = Math.abs(entryPrice - slPrice);
     var tp1Price, tpFinalPrice;
     if (isLong) {
@@ -1953,7 +1950,8 @@
       "TP1 " + fmtP(s.tp1Price) + " (Geser SL ke BEP)",
       "TP FINAL " + fmtP(s.tpFinalPrice) + " (R:R 1:" + s.rrRatio + ")",
       "Momentum Expiry: Close 4x 5M " + (s.bias === "LONG" ? "< " : "> ") + fmtP(s.expiryPrice)
-    ].join("\n");
+    ].join("
+");
     copyTextSafe(msg, "Sinyal MUAK ULTIMATE disalin!");
   };
 
@@ -2340,9 +2338,9 @@
       var isAct = sym === active;
       var levTag = app.mode === "futures" ? '<span class="lev-pill mono">' + getLev(sym) + 'x</span>' : '';
       var delTag = (app.mode === "futures" && app.watchlist.length > 1)
-        ? '<span class="del-coin" onclick="event.stopPropagation();removeCoin(\'' + sym + '\')">×</span>'
+        ? '<span class="del-coin" onclick="event.stopPropagation();removeCoin('' + sym + '')">×</span>'
         : '';
-      return '<button class="chip-btn ' + (isAct ? "active" : "") + '" onclick="pickCoin(\'' + sym + '\')">' + sym + levTag + delTag + '</button>';
+      return '<button class="chip-btn ' + (isAct ? "active" : "") + '" onclick="pickCoin('' + sym + '')">' + sym + levTag + delTag + '</button>';
     }).join("");
 
     var levBadge = document.getElementById("levInfoBadge");
@@ -2414,7 +2412,7 @@
     if (val.slice(-4) !== "USDT") val += "USDT";
     if (app.watchlist.indexOf(val) === -1) {
       app.watchlist.push(val);
-      writeStore("hc24_watchlist", app.watchlist);
+      writeStore("hc25_watchlist", app.watchlist);
     }
     inp.value = "";
     window.pickCoin(val);
@@ -2424,7 +2422,7 @@
   window.removeCoin = function(sym) {
     if (app.watchlist.length <= 1) return;
     app.watchlist = app.watchlist.filter(function(c) { return c !== sym; });
-    writeStore("hc24_watchlist", app.watchlist);
+    writeStore("hc25_watchlist", app.watchlist);
     if (app.futCoin === sym) app.futCoin = app.watchlist[0];
     renderCoinChips();
     refreshAllVisibleKlines();
@@ -2457,12 +2455,13 @@
     var c15 = analyzeCandles(app.klines[sym + "_15m"] || []);
     var c1h = analyzeCandles(app.klines[sym + "_1h"] || []);
     var txt = [
-      "📊 HARCRIPT v2.4 SNAPSHOT (172-CANDLE) — " + sym,
+      "📊 HARCRIPT v2.5 SNAPSHOT (172-CANDLE) — " + sym,
       "Harga Live: " + fmtP(price),
       "5M: Close " + fmtP(c5.close) + " | E7 " + fmtP(c5.ema7) + " | E25 " + fmtP(c5.ema25) + " | E99 " + fmtP(c5.ema99) + " | RSI6 " + c5.rsi6.toFixed(1),
       "15M: Close " + fmtP(c15.close) + " | E7 " + fmtP(c15.ema7) + " | E25 " + fmtP(c15.ema25) + " | ADX " + c15.adx14.toFixed(1),
       "1H: Close " + fmtP(c1h.close) + " | E7 " + fmtP(c1h.ema7) + " | E99 " + fmtP(c1h.ema99)
-    ].join("\n");
+    ].join("
+");
     copyTextSafe(txt, "Data live multi-TF disalin!");
   };
 
@@ -2531,7 +2530,7 @@
     var pnl = parseFloat(document.getElementById("lPnl").value) || 0;
     var time = document.getElementById("hdrClock").textContent;
     app.logs.unshift({ sym: sym, dir: dir, entry: entry, res: res, pnl: pnl, time: time });
-    writeStore("hc24_logs", app.logs);
+    writeStore("hc25_logs", app.logs);
     document.getElementById("lPnl").value = "";
     renderLogsUI();
     toast("Catatan trade tersimpan!");
@@ -2539,7 +2538,7 @@
 
   window.delLog = function(i) {
     app.logs.splice(i, 1);
-    writeStore("hc24_logs", app.logs);
+    writeStore("hc25_logs", app.logs);
     renderLogsUI();
   };
 
