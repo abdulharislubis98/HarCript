@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <link rel="manifest" href="manifest.json" />
-<title>HarCript v2.4 — Pure Momentum Naik/Turun &amp; MASTER CALL MUAK ULTIMATE</title>
+<title>HarCript v2.6 — Pure Momentum Naik/Turun &amp; MASTER CALL MUAK ULTIMATE</title>
 <style>
   :root {
     --bg: #f1f5f9;
@@ -839,9 +839,9 @@
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <div class="logo-box">H2.4</div>
+        <div class="logo-box">H2.6</div>
         <div>
-          <div class="brand-title">HarCript <span class="ver-badge">v2.4</span></div>
+          <div class="brand-title">HarCript <span class="ver-badge">v2.6</span></div>
           <div class="brand-sub">Pure Momentum Naik/Turun &amp; MASTER CALL MUAK ULTIMATE</div>
         </div>
       </div>
@@ -1525,7 +1525,7 @@
   }
 
   // =========================================================================
-  // 4. MODE NAIK / TURUN ENGINE (BACKTEST 100 SESI CLOSED + AUTO-LOCK ACUAN)
+  // 4. MODE NAIK / TURUN ENGINE (ROLLING 100-SESI CLOSED + TOP 4/5 RANKING)
   // =========================================================================
   app.udStatsCache = {};
   app.udStatsLoading = {};
@@ -1575,7 +1575,6 @@
   }
 
   function getClosedBoundaryMs(dur, nowMs) {
-    var d = new Date(nowMs);
     if (dur === "5m") {
       var step5 = 5 * 60000;
       return Math.floor(nowMs / step5) * step5;
@@ -1595,7 +1594,6 @@
   }
 
   function fmtWibHourLabel(stepIdx) {
-    // stepIdx = 1..23 hours after 23:00 WIB
     var wibHour = (23 + stepIdx) % 24;
     return String(wibHour).padStart(2, "0") + ":00 WIB";
   }
@@ -1604,6 +1602,14 @@
     if (!step) return "--";
     if (dur === "1d") return "Close Jam " + fmtWibHourLabel(step);
     return "Close Menit ke-" + step;
+  }
+
+  function isLateStep(dur, step) {
+    if (dur === "5m") return step >= 4;
+    if (dur === "15m") return step >= 12;
+    if (dur === "1h") return step >= 50;
+    if (dur === "1d") return step >= 21;
+    return false;
   }
 
   async function compute100SessionAcuan(sym, dur, force) {
@@ -1626,7 +1632,7 @@
       var targetSessions = 100;
       var totalCandlesNeeded = targetSessions * stepsPerSession;
 
-      // Only pull candles strictly BEFORE current active session starts (closed sessions only)
+      // Rolling Window: strictly 100 closed sessions prior to current active sessionStartMs
       var histCandles = await fetchPaginatedKlines(sym, subInterval, totalCandlesNeeded, sessionStartMs - 1);
 
       var byOpenTime = {};
@@ -1635,7 +1641,7 @@
       }
 
       var validSessions = [];
-      for (var s = 1; s <= targetSessions + 5; s++) {
+      for (var s = 1; s <= targetSessions + 6; s++) {
         if (validSessions.length >= targetSessions) break;
         var sStart = sessionStartMs - s * sessionMs;
         var firstC = byOpenTime[sStart];
@@ -1665,9 +1671,6 @@
         });
       }
 
-      var bestStep = 1;
-      var bestWinrate = 0;
-      var bestHits = 0;
       var totalEvaluated = validSessions.length;
       var allStepsStats = [];
 
@@ -1683,15 +1686,27 @@
           if (stepUp === vs.finalUp) hits++;
         }
         var wr = counted > 0 ? (hits / counted) * 100 : 0;
-        allStepsStats.push({ step: step, winrate: wr, hits: hits, counted: counted });
-        if (wr > bestWinrate || (wr === bestWinrate && step < bestStep)) {
-          bestWinrate = wr;
-          bestStep = step;
-          bestHits = hits;
-        }
+        allStepsStats.push({
+          step: step,
+          winrate: wr,
+          hits: hits,
+          counted: counted,
+          label: formatAcuanShort(dur, step),
+          isLate: isLateStep(dur, step)
+        });
       }
 
-      // Also fetch current active session sub-candles so we can read exact Open & Acuan Close
+      // Sort descending by winrate; tie-breaker: earlier step (more time left to enter)
+      var sortedSteps = allStepsStats.slice().sort(function(a, b) {
+        if (Math.abs(b.winrate - a.winrate) > 0.001) return b.winrate - a.winrate;
+        return a.step - b.step;
+      });
+
+      var topCount = dur === "5m" ? 4 : 5;
+      var topSteps = sortedSteps.slice(0, topCount);
+      var bestItem = topSteps[0] || { step: 1, winrate: 0, hits: 0, counted: 0, label: "--", isLate: false };
+
+      // Fetch active session sub-candles so we can read exact Open & every Acuan Close live
       var activeRaw = [];
       try {
         var rAct = await apiGet("/klines?symbol=" + sym + "&interval=" + subInterval + "&startTime=" + sessionStartMs + "&limit=" + (stepsPerSession + 2));
@@ -1715,10 +1730,11 @@
         subMs: subMs,
         stepsPerSession: stepsPerSession,
         totalEvaluated: totalEvaluated,
-        bestStep: bestStep,
-        bestWinrate: bestWinrate,
-        bestHits: bestHits,
-        acuanLabel: formatAcuanShort(dur, bestStep),
+        bestStep: bestItem.step,
+        bestWinrate: bestItem.winrate,
+        bestHits: bestItem.hits,
+        acuanLabel: bestItem.label,
+        topSteps: topSteps,
         allStepsStats: allStepsStats,
         activeCandles: activeRaw,
         fetchedAt: Date.now()
@@ -1733,47 +1749,33 @@
     return promise;
   }
 
-  function evaluateActiveAcuanLock(stat) {
-    var nowMs = Date.now();
-    var livePrice = (app.prices[stat.sym] && app.prices[stat.sym].price) || 0;
-    var acuanCloseTimeMs = stat.sessionStartMs + stat.bestStep * stat.subMs;
+  function evaluateStepStatus(stat, stepItem, nowMs, sessionOpen) {
+    var acuanCloseTimeMs = stat.sessionStartMs + stepItem.step * stat.subMs;
+    var isReached = nowMs >= acuanCloseTimeMs;
+    var waitSec = Math.max(0, Math.ceil((acuanCloseTimeMs - nowMs) / 1000));
 
-    var sessionOpen = livePrice;
-    var acuanClosePrice = null;
-    if (stat.activeCandles && stat.activeCandles.length > 0) {
-      sessionOpen = stat.activeCandles[0].open;
-      var targetOpenTime = stat.sessionStartMs + (stat.bestStep - 1) * stat.subMs;
+    var closePrice = null;
+    if (isReached && stat.activeCandles && stat.activeCandles.length > 0) {
+      var targetOpenTime = stat.sessionStartMs + (stepItem.step - 1) * stat.subMs;
       for (var i = 0; i < stat.activeCandles.length; i++) {
-        if (stat.activeCandles[i].openTime === targetOpenTime && nowMs >= acuanCloseTimeMs) {
-          acuanClosePrice = stat.activeCandles[i].close;
+        if (stat.activeCandles[i].openTime === targetOpenTime) {
+          closePrice = stat.activeCandles[i].close;
           break;
         }
       }
     }
 
-    var isReached = nowMs >= acuanCloseTimeMs;
-    var waitSec = Math.max(0, Math.ceil((acuanCloseTimeMs - nowMs) / 1000));
-    var remSessionSec = Math.max(0, Math.ceil((stat.sessionEndMs - nowMs) / 1000));
-
-    var tier = stat.bestWinrate >= 68 ? "green" : (stat.bestWinrate >= 60 ? "amber" : "red");
-    var tierLabel = stat.bestWinrate >= 68 ? "KUAT (≥68%)" : (stat.bestWinrate >= 60 ? "CUKUP (60–67%)" : "SKIP (<60%)");
-
     var direction = null;
-    if (isReached && acuanClosePrice !== null && sessionOpen > 0) {
-      if (acuanClosePrice > sessionOpen) direction = "NAIK";
-      else if (acuanClosePrice < sessionOpen) direction = "TURUN";
+    if (isReached && closePrice !== null && sessionOpen > 0) {
+      if (closePrice > sessionOpen) direction = "NAIK";
+      else if (closePrice < sessionOpen) direction = "TURUN";
       else direction = "FLAT";
     }
 
     return {
       isReached: isReached,
       waitSec: waitSec,
-      remSessionSec: remSessionSec,
-      sessionOpen: sessionOpen,
-      acuanClosePrice: acuanClosePrice,
-      livePrice: livePrice,
-      tier: tier,
-      tierLabel: tierLabel,
+      closePrice: closePrice,
       direction: direction
     };
   }
@@ -1800,13 +1802,19 @@
       });
     }
 
-    // Also update duration button pills for active coin (or BTC in per_time)
     var refSym = app.udView === "per_time" ? "BTCUSDT" : app.udCoin;
     ["5m", "15m", "1h", "1d"].forEach(function(d) {
       compute100SessionAcuan(refSym, d, false).then(function(st) {
         var pill = document.getElementById("durAcuan_" + d);
-        if (pill && st) {
-          pill.textContent = st.acuanLabel + " (" + st.bestWinrate.toFixed(0) + "%)";
+        if (pill && st && st.topSteps && st.topSteps.length > 0) {
+          // If #1 is late-session and #2 >= 60%, show #1 & #2 hint on pill
+          var p1 = st.topSteps[0];
+          var p2 = st.topSteps[1];
+          if (p1.isLate && p2 && p2.winrate >= 60) {
+            pill.textContent = "#1 " + p1.label.replace("Close ", "") + " (" + p1.winrate.toFixed(0) + "%) | #2 " + p2.label.replace("Close ", "") + " (" + p2.winrate.toFixed(0) + "%)";
+          } else {
+            pill.textContent = "Top: " + p1.label.replace("Close ", "") + " (" + p1.winrate.toFixed(0) + "%)";
+          }
         }
       });
     });
@@ -1816,9 +1824,9 @@
   }
 
   window.forceRefreshUdStats = async function() {
-    toast("Mengaudit ulang 100 sesi tertutup terakhir dari Binance...");
+    toast("Mengaudit ulang rolling 100 sesi tertutup dari Binance...");
     await refreshUdStatisticalEngine(true);
-    toast("Audit 100 sesi selesai & acuan diperbarui!");
+    toast("Rolling 100 sesi selesai & peringkat diperbarui!");
   };
 
   function renderUdAutoLockBoard() {
@@ -1850,8 +1858,8 @@
       board.innerHTML = [
         '<div class="sig-head">',
         '  <div>',
-        '    <div class="sig-title">🎯 SCANNER STATISTIK 100 SESI CLOSED (AUTO-LOCK ACUAN)</div>',
-        '    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Menarik 100 sesi tertutup ke belakang dari server Binance untuk mencari menit/jam paling akurat...</div>',
+        '    <div class="sig-title">🎯 PERINGKAT WAKTU ACUAN TERBAIK — ROLLING 100 SESI CLOSED</div>',
+        '    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Menarik 100 sesi tertutup terakhir dari server Binance untuk menyusun peringkat menit/jam paling akurat...</div>',
         '  </div>',
         '</div>'
       ].join("");
@@ -1862,65 +1870,65 @@
     board.classList.add(bestWr >= 68 ? "border-green" : (bestWr >= 60 ? "border-amber" : "border-red"));
 
     var cardsHtml = items.map(function(st) {
-      var ev = evaluateActiveAcuanLock(st);
+      var livePrice = (app.prices[st.sym] && app.prices[st.sym].price) || 0;
+      var sessionOpen = (st.activeCandles && st.activeCandles.length > 0) ? st.activeCandles[0].open : livePrice;
+      var tier = st.bestWinrate >= 68 ? "green" : (st.bestWinrate >= 60 ? "amber" : "red");
+      var tierLabel = st.bestWinrate >= 68 ? "KUAT (≥68%)" : (st.bestWinrate >= 60 ? "CUKUP (60–67%)" : "SKIP (<60%)");
+
       var durNames = { "5m": "Opsi 5 Menit", "15m": "Opsi 15 Menit", "1h": "Opsi 1 Jam", "1d": "Opsi 1 Hari (23:00 WIB)" };
       var headTitle = app.udView === "per_time"
         ? st.sym.replace("USDT", "") + " • " + durNames[st.dur]
         : durNames[st.dur] + " (" + st.sym.replace("USDT", "") + ")";
 
-      var statusBlock = "";
-      if (st.bestWinrate < 60) {
-        statusBlock = [
-          '<div style="background:rgba(220,38,38,0.1);border:1px solid var(--red-border);border-radius:9px;padding:8px 10px;margin:6px 0;">',
-          '  <div style="font-size:14px;font-weight:900;color:var(--red);">⚠️ SKIP SESI INI (PASAR ACAK)</div>',
-          '  <div style="font-size:11px;color:#7f1d1d;margin-top:2px;">Winrate tertinggi hanya <strong>' + st.bestWinrate.toFixed(1) + '%</strong> (&lt; 60% standar minimal).</div>',
-          '</div>'
-        ].join("");
-      } else if (!ev.isReached) {
-        statusBlock = [
-          '<div style="background:#ffffff;border:1.5px dashed var(--amber-border);border-radius:9px;padding:8px 10px;margin:6px 0;">',
-          '  <div style="font-size:13px;font-weight:900;color:#b45309;">⏳ MENUNGGU ' + st.acuanLabel.toUpperCase() + '</div>',
-          '  <div class="mono" style="font-size:12px;font-weight:800;color:var(--text);margin-top:2px;">Hasil otomatis muncul dalam: <span style="color:var(--primary);">' + fmtWaitClock(ev.waitSec) + '</span></div>',
-          '</div>'
-        ].join("");
-      } else if (ev.acuanClosePrice === null) {
-        statusBlock = [
-          '<div style="background:#ffffff;border:1px solid var(--border-strong);border-radius:9px;padding:8px 10px;margin:6px 0;">',
-          '  <div style="font-size:13px;font-weight:900;color:var(--primary);">🔄 MEMBACA CLOSE ' + st.acuanLabel.toUpperCase() + '...</div>',
-          '</div>'
-        ].join("");
-      } else {
-        var isUp = ev.direction === "NAIK";
-        var isFlat = ev.direction === "FLAT";
-        var dirCol = isFlat ? "#b45309" : (isUp ? "var(--green)" : "var(--red)");
-        var dirTxt = isFlat ? "◆ SAMA DENGAN OPEN (SKIP)" : (isUp ? "▲ NAIK (CALL)" : "▼ TURUN (PUT)");
-        statusBlock = [
-          '<div style="background:#ffffff;border:2px solid ' + dirCol + ';border-radius:9px;padding:8px 10px;margin:6px 0;">',
-          '  <div style="font-size:10px;font-weight:800;color:var(--text-muted);">KEPUTUSAN OTOMATIS (TERKUNCI DARI ' + st.acuanLabel.toUpperCase() + ')</div>',
-          '  <div style="font-size:19px;font-weight:900;color:' + dirCol + ';margin-top:1px;">' + dirTxt + '</div>',
-          '</div>'
-        ].join("");
-      }
+      var rankTitle = st.dur === "5m" ? "TOP 4 MENIT PALING AKURAT (100 SESI)" : "TOP 5 WAKTU PALING AKURAT (100 SESI)";
 
-      var diffOpenAcuan = (ev.acuanClosePrice !== null && ev.sessionOpen > 0)
-        ? ((ev.acuanClosePrice - ev.sessionOpen) / ev.sessionOpen) * 100
-        : 0;
+      var rowsHtml = st.topSteps.map(function(stepItem, rIdx) {
+        var ev = evaluateStepStatus(st, stepItem, nowMs, sessionOpen);
+        var wrCol = stepItem.winrate >= 68 ? "var(--green)" : (stepItem.winrate >= 60 ? "#b45309" : "var(--red)");
+        var rowBg = stepItem.winrate >= 68 ? "rgba(16,185,129,0.08)" : (stepItem.winrate >= 60 ? "rgba(245,158,11,0.08)" : "rgba(239,68,68,0.06)");
+        var lateTag = stepItem.isLate
+          ? ' <span style="font-size:9px;background:#fee2e2;color:#b91c1c;padding:1px 4px;border-radius:4px;font-weight:800;">MEPET</span>'
+          : ' <span style="font-size:9px;background:#dcfce7;color:#15803d;padding:1px 4px;border-radius:4px;font-weight:800;">IDEAL</span>';
+
+        var rightBadge = "";
+        if (stepItem.winrate < 60) {
+          rightBadge = '<span style="font-size:10px;font-weight:800;color:var(--red);">SKIP (&lt;60%)</span>';
+        } else if (!ev.isReached) {
+          rightBadge = '<span style="font-size:10px;font-weight:800;color:#b45309;">⏳ ' + fmtWaitClock(ev.waitSec) + '</span>';
+        } else if (ev.closePrice === null) {
+          rightBadge = '<span style="font-size:10px;font-weight:800;color:var(--primary);">🔄 Cek...</span>';
+        } else if (ev.direction === "NAIK") {
+          rightBadge = '<span style="background:var(--green);color:#fff;padding:2px 6px;border-radius:5px;font-size:10px;font-weight:900;">▲ NAIK (' + fmtP(ev.closePrice) + ')</span>';
+        } else if (ev.direction === "TURUN") {
+          rightBadge = '<span style="background:var(--red);color:#fff;padding:2px 6px;border-radius:5px;font-size:10px;font-weight:900;">▼ TURUN (' + fmtP(ev.closePrice) + ')</span>';
+        } else {
+          rightBadge = '<span style="background:#64748b;color:#fff;padding:2px 6px;border-radius:5px;font-size:10px;font-weight:900;">◆ FLAT</span>';
+        }
+
+        return [
+          '<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;background:' + rowBg + ';border:1px solid var(--border);border-radius:8px;padding:6px 8px;flex-wrap:wrap;">',
+          '  <div class="mono" style="font-size:11px;">',
+          '    <strong style="color:var(--primary);">#' + (rIdx + 1) + '</strong> ',
+          '    <strong>' + stepItem.label + '</strong>' + lateTag,
+          '    <div style="font-size:10px;color:' + wrCol + ';font-weight:800;">Akurasi: ' + stepItem.winrate.toFixed(1) + '% (' + stepItem.hits + '/' + stepItem.counted + ')</div>',
+          '  </div>',
+          '  <div class="mono" style="text-align:right;">' + rightBadge + '</div>',
+          '</div>'
+        ].join("");
+      }).join("");
 
       return [
-        '<div class="ud-item ' + ev.tier + '">',
-        '  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:4px;flex-wrap:wrap;">',
-        '    <div>',
-        '      <strong style="font-size:13px;">' + headTitle + '</strong>',
-        '      <div class="mono" style="font-size:11px;font-weight:800;color:var(--primary);margin-top:1px;">📌 Acuan: ' + st.acuanLabel + '</div>',
-        '    </div>',
-        '    <span class="conf-badge ' + ev.tier + ' mono">' + st.bestWinrate.toFixed(1) + '% • ' + ev.tierLabel + '</span>',
+        '<div class="ud-item ' + tier + '">',
+        '  <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">',
+        '    <strong style="font-size:13px;">' + headTitle + '</strong>',
+        '    <span class="conf-badge ' + tier + ' mono">Top: ' + st.bestWinrate.toFixed(1) + '% • ' + tierLabel + '</span>',
         '  </div>',
-        statusBlock,
-        '  <div class="mono" style="font-size:11px;display:flex;flex-direction:column;gap:2px;margin-top:4px;">',
-        '    <div>Open Sesi: <strong>' + fmtP(ev.sessionOpen) + '</strong></div>',
-        '    <div>' + st.acuanLabel + ': <strong>' + (ev.acuanClosePrice !== null ? fmtP(ev.acuanClosePrice) + ' (' + (diffOpenAcuan >= 0 ? "+" : "") + diffOpenAcuan.toFixed(3) + '%)' : 'Belum Close') + '</strong></div>',
-        '    <div>Harga Live: <strong>' + fmtP(ev.livePrice) + '</strong> • Sampel: <strong>' + st.bestHits + '/' + st.totalEvaluated + ' sesi closed</strong></div>',
+        '  <div class="mono" style="font-size:11px;background:#ffffff;border:1px solid var(--border);border-radius:8px;padding:6px 8px;margin-bottom:7px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;">',
+        '    <span>Open Sesi: <strong>' + fmtP(sessionOpen) + '</strong></span>',
+        '    <span>Live: <strong>' + fmtP(livePrice) + '</strong></span>',
         '  </div>',
+        '  <div style="font-size:10px;font-weight:900;color:var(--text-muted);letter-spacing:0.3px;margin-bottom:5px;">' + rankTitle + '</div>',
+        '  <div style="display:flex;flex-direction:column;gap:5px;">' + rowsHtml + '</div>',
         '</div>'
       ].join("");
     }).join("");
@@ -1928,8 +1936,8 @@
     board.innerHTML = [
       '<div class="sig-head">',
       '  <div>',
-      '    <div class="sig-title">🎯 HASIL OTOMATIS NAIK / TURUN — AUDIT 100 SESI CLOSED</div>',
-      '    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Otomatis muncul setelah waktu acuan close • 🟢 ≥68% Kuat • 🟡 60–67% Cukup • 🔴 &lt;60% Skip (Pasar Acak)</div>',
+      '    <div class="sig-title">🎯 PERINGKAT WAKTU ACUAN TERBAIK — ROLLING 100 SESI CLOSED</div>',
+      '    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Jika #1 bertanda <strong style="color:#b91c1c;">MEPET</strong> di akhir sesi, langsung gunakan peringkat #2 atau #3 yang bertanda <strong style="color:#15803d;">IDEAL</strong> • Standar Minimal ≥ 60%</div>',
       '  </div>',
       '</div>',
       '<div class="ud-grid">' + cardsHtml + '</div>'
@@ -2814,8 +2822,37 @@
 
     // Re-render auto-lock board every second for countdown & instant unlock when acuan minute/hour closes
     renderUdAutoLockBoard();
-    if (sec === 1 || sec === 2) {
-      refreshUdStatisticalEngine(false);
+    if (sec === 1 || sec === 3) {
+      // Refresh active session sub-candles so closed minute/hour prices populate immediately
+      var nowM = Date.now();
+      var symsToCheck = app.udView === "per_time" ? CORE_3 : [app.udCoin];
+      var dursToCheck = app.udView === "per_time" ? [app.udDur] : ["5m", "15m", "1h", "1d"];
+      symsToCheck.forEach(function(s) {
+        dursToCheck.forEach(function(d) {
+          var bMs = getClosedBoundaryMs(d, nowM);
+          var cKey = s + "_" + d + "_" + bMs;
+          if (!app.udStatsCache[cKey]) {
+            refreshUdStatisticalEngine(false);
+          } else {
+            var subInt = d === "1d" ? "1h" : "1m";
+            var stepsPer = d === "5m" ? 5 : (d === "15m" ? 15 : (d === "1h" ? 60 : 24));
+            apiGet("/klines?symbol=" + s + "&interval=" + subInt + "&startTime=" + bMs + "&limit=" + (stepsPer + 2))
+              .then(function(rAct) {
+                if (Array.isArray(rAct) && app.udStatsCache[cKey]) {
+                  app.udStatsCache[cKey].activeCandles = rAct.map(function(r) {
+                    return {
+                      openTime: Number(r[0]),
+                      open: parseFloat(r[1]),
+                      close: parseFloat(r[4]),
+                      closeTime: Number(r[6])
+                    };
+                  });
+                  renderUdAutoLockBoard();
+                }
+              }).catch(function() {});
+          }
+        });
+      });
     }
   }
 
@@ -2953,7 +2990,7 @@
     var c15 = analyzeCandles(app.klines[sym + "_15m"] || []);
     var c1h = analyzeCandles(app.klines[sym + "_1h"] || []);
     var txt = [
-      "📊 HARCRIPT v2.4 SNAPSHOT (172-CANDLE) — " + sym,
+      "📊 HARCRIPT v2.6 SNAPSHOT (172-CANDLE) — " + sym,
       "Harga Live: " + fmtP(price),
       "5M: Close " + fmtP(c5.close) + " | E7 " + fmtP(c5.ema7) + " | E25 " + fmtP(c5.ema25) + " | E99 " + fmtP(c5.ema99) + " | RSI6 " + c5.rsi6.toFixed(1),
       "15M: Close " + fmtP(c15.close) + " | E7 " + fmtP(c15.ema7) + " | E25 " + fmtP(c15.ema25) + " | ADX " + c15.adx14.toFixed(1),
